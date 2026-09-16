@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F5A43">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stagione">
+<title>Stagione 2026/27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F0; --surface:#FFFFFF; --ink:#15201B; --muted:#5B6A63; --line:#D3DCD8;
+  --pitch:#1F5A43; --pitch-soft:#DCEAE3; --on-pitch:#FFFFFF;
+  --go:#2E9A58; --go-soft:#D6F0DF; --warn:#D99A12; --warn-soft:#FBEFC8; --stop:#C9432F; --stop-soft:#F8D9D3;
+  --t-esp:#FCE0C4; --t-gam:#D4E4F4; --t-alt:#DDE1F6; --t-gin:#D3EDD9; --t-core:#EADCF2; --t-anca:#FBEFC0; --t-risc:#E6EBEE;
+  --radius-l:18px; --radius-s:8px;
+  --display:"Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body:"Barlow", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1613; --surface:#18221D; --ink:#E4ECE8; --muted:#94A59D; --line:#2A3832;
+    --pitch:#4FA37E; --pitch-soft:#1F3229; --on-pitch:#0F1613;
+    --go:#49B874; --go-soft:#1B3325; --warn:#E8B23A; --warn-soft:#3A3117; --stop:#E5654F; --stop-soft:#3D221D;
+    --t-esp:#43301E; --t-gam:#1E3043; --t-alt:#262B45; --t-gin:#1E3A28; --t-core:#35283F; --t-anca:#3D3719; --t-risc:#27302D;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1613; --surface:#18221D; --ink:#E4ECE8; --muted:#94A59D; --line:#2A3832;
+  --pitch:#4FA37E; --pitch-soft:#1F3229; --on-pitch:#0F1613;
+  --go:#49B874; --go-soft:#1B3325; --warn:#E8B23A; --warn-soft:#3A3117; --stop:#E5654F; --stop-soft:#3D221D;
+  --t-esp:#43301E; --t-gam:#1E3043; --t-alt:#262B45; --t-gin:#1E3A28; --t-core:#35283F; --t-anca:#3D3719; --t-risc:#27302D;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--pitch);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px calc(110px + env(safe-area-inset-bottom))}
+.btn{min-height:46px;border:1px solid var(--pitch);background:var(--pitch);color:var(--on-pitch);border-radius:10px;padding:8px 14px;font-weight:600;font-size:15px}
+.btn.ghost{background:transparent;color:var(--pitch)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+header.top{position:sticky;top:0;z-index:5;background:var(--pitch);color:var(--on-pitch);padding:calc(10px + env(safe-area-inset-top)) 14px 12px}
+.top-inner{max-width:560px;margin:0 auto}
+.datenav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.datenav > button{background:transparent;border:0;color:inherit;font-size:28px;line-height:1;width:44px;height:44px;border-radius:50%}
+.datenav > button:hover{background:rgba(255,255,255,.12)}
+.date-main{text-align:center;flex:1}
+.date-main h1{font-family:var(--display);font-weight:700;font-size:27px;white-space:nowrap;line-height:1.05;margin:0;letter-spacing:.2px}
+.date-main .sub{font-size:14px;opacity:.85}
+.today-link{background:rgba(255,255,255,.16);border:0;border-radius:99px;padding:2px 10px;font-size:13px;margin-top:4px;color:inherit}
+
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-l);padding:16px;margin-top:14px}
+h2{font-family:var(--display);font-weight:600;font-size:23px;margin:0 0 2px;line-height:1.1}
+.hint{color:var(--muted);font-size:14px;margin:0 0 10px}
+.banner{border-radius:var(--radius-s);padding:10px 12px;font-size:14.5px;margin-top:12px;background:var(--pitch-soft)}
+
+/* Semaforo */
+.scale{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin:8px 0 10px}
+.scale button{height:42px;border:1px solid var(--line);background:var(--bg);border-radius:8px;font-family:var(--display);font-weight:600;font-size:19px;padding:0}
+.scale button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{flex:1 1 45%;min-height:46px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;text-align:left;font-size:15px}
+.toggle[aria-pressed="true"]{border-color:var(--stop);background:var(--stop-soft)}
+.light{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:center;margin-top:14px;padding:14px;border-radius:14px;background:var(--bg)}
+.lamp{width:64px;height:64px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:15px;color:var(--surface);transition:background .25s}
+.light.verde{background:var(--go-soft)} .light.verde .lamp{background:var(--go)}
+.light.giallo{background:var(--warn-soft)} .light.giallo .lamp{background:var(--warn);color:#2A2008}
+.light.rosso{background:var(--stop-soft)} .light.rosso .lamp{background:var(--stop)}
+.light h3{font-family:var(--display);font-size:24px;margin:0;line-height:1}
+.light p{margin:4px 0 0;font-size:14.5px}
+
+/* Liste esercizi */
+.group-title{font-family:var(--display);font-weight:600;font-size:18px;margin:16px 0 4px;color:var(--muted)}
+ul.ex{list-style:none;margin:0;padding:0}
+ul.ex li{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+ul.ex li:first-child{border-top:0}
+.chk{width:30px;height:30px;border-radius:8px;border:2px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;padding:0}
+.chk[aria-pressed="true"]{background:var(--pitch);border-color:var(--pitch)}
+.chk[aria-pressed="true"]::after{content:"";width:12px;height:7px;border-left:3px solid var(--on-pitch);border-bottom:3px solid var(--on-pitch);transform:rotate(-45deg) translate(1px,-1px)}
+li.done .name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.name{font-weight:500;font-size:15.5px;line-height:1.25}
+.meta{font-size:13.5px;color:var(--muted);margin-top:2px}
+.meta b{font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink)}
+.tag{display:inline-block;font-size:12px;border-radius:5px;padding:0 6px;margin-right:4px;color:var(--ink)}
+.note{font-size:13px;color:var(--muted);margin-top:3px}
+.kg{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.kg input{width:64px;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--bg);text-align:center;font-family:var(--display);font-size:19px;font-weight:600}
+.kg small{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.progress{height:6px;border-radius:3px;background:var(--bg);overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--pitch);width:0;transition:width .3s}
+
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-height:44px;border:1px solid var(--line);background:var(--bg);border-radius:10px;font-size:15px;padding:6px}
+.seg button[aria-pressed="true"]{background:var(--pitch);color:var(--on-pitch);border-color:var(--pitch)}
+textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:10px;resize:vertical}
+label.fld{display:block;font-weight:500;margin:14px 0 6px}
+input[type=date]{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:0 10px}
+
+/* Storico */
+.chart{width:100%;overflow-x:auto}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:grid;grid-template-columns:14px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.hist li:first-child{border-top:0}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.dot.verde{background:var(--go)} .dot.giallo{background:var(--warn)} .dot.rosso{background:var(--stop)}
+.hist button{all:unset;cursor:pointer;display:contents}
+.hist .d{font-weight:500}
+.hist .r{font-family:var(--display);font-size:17px;color:var(--muted);text-align:right}
+
+/* Regole */
+.rule{border-left:5px solid var(--line);padding:6px 0 6px 12px;margin:10px 0}
+.rule.verde{border-color:var(--go)} .rule.giallo{border-color:var(--warn)} .rule.rosso{border-color:var(--stop)}
+.rule h3{margin:0;font-family:var(--display);font-size:20px}
+.rule p{margin:2px 0;font-size:14.5px}
+.tbl{width:100%;overflow-x:auto}
+.tbl table{border-collapse:collapse;width:100%;font-size:14px;min-width:420px}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+.tbl th{font-weight:600;color:var(--muted)}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:6;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs button{background:none;border:0;height:58px;font-size:14px;color:var(--muted);font-weight:500;border-top:3px solid transparent}
+nav.tabs button[aria-selected="true"]{color:var(--pitch);border-top-color:var(--pitch)}
+.sync{font-size:12.5px;color:var(--muted);text-align:center;margin-top:18px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="datenav">
+      <button id="prev" aria-label="Giorno precedente">‹</button>
+      <div class="date-main">
+        <h1 id="dateTitle">–</h1>
+        <div class="sub" id="dateSub">–</div>
+        <button class="today-link" id="goToday" hidden>Torna a oggi</button>
+      </div>
+      <button id="next" aria-label="Giorno successivo">›</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="view"></main>
+
+<nav class="tabs" aria-label="Sezioni">
+  <div class="in" role="tablist">
+    <button role="tab" data-tab="oggi" aria-selected="true">Giorno</button>
+    <button role="tab" data-tab="storico" aria-selected="false">Storico</button>
+    <button role="tab" data-tab="regole" aria-selected="false">Regole</button>
+    <button role="tab" data-tab="impostazioni" aria-selected="false">Impostazioni</button>
+  </div>
+</nav>
+
+<script>
+const PLAN = {"startDefault":"2026-09-21","fasi":[{"n":1,"nome":"Rientro","settimane":"1–3","date":"21/09 – 11/10","obiettivo":"Stabilizzare il ginocchio, riabituarlo al carico e rientrare in squadra per passi.","cambia":"RPE 6–7, esplosività solo senza impatto (cyclette, kettlebell, palla medica), box squat su box alto, isometrie per il quadricipite."},{"n":2,"nome":"Costruzione","settimane":"4–7 (8 scarico)","date":"12/10 – 15/11","obiettivo":"Aumentare la forza e allenare la frenata in modo controllato.","cambia":"Box jump con discesa a passi, atterraggi stabilizzati, leg extension dinamica, Nordic curl, box al parallelo."},{"n":3,"nome":"Esplosività","settimane":"9–12 (13 scarico)","date":"16/11 – 20/12","obiettivo":"Trasformare la forza in velocità ed esplosività.","cambia":"Salite esplosive, salti laterali con stop, pogo jump, ripetizioni basse e intenzione veloce."},{"n":4,"nome":"Mantenimento","settimane":"14 → maggio","date":"dal 21/12","obiettivo":"Mantenere forza ed esplosività fino a fine campionato senza accumulare fatica.","cambia":"Sedute della Fase 3 con esercizi di forza a 3 serie. Cicli di 4 settimane: 3 normali + 1 di scarico."}],"scarico":"Settimane 8, 13 e ogni quarta settimana della Fase 4: stesse sedute con una serie in meno per esercizio, RPE di un punto più basso e salti dimezzati.","pausaInvernale":"Durante la pausa invernale, senza calcio: Seduta A il lunedì, Seduta B il mercoledì, Seduta A senza salti il venerdì, più 2 uscite di cyclette da 30' facili. Nell'ultima settimana di pausa torna allo schema normale.","sedute":{"A":{"titolo":"Seduta A – Martedì","sotto":"Gambe controllate + spinta parte alta · 17:30–18:30, poi calcio","fasi":{"1":[{"id":"wu_bike","nome":"Cyclette progressiva","prescr":"5'","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Sella alta, resistenza in aumento"},{"id":"wu_band","nome":"Camminata laterale con mini band","prescr":"2×10 per lato","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Band sopra le ginocchia, spingi le ginocchia in fuori"},{"id":"wu_bridge","nome":"Ponte glutei","prescr":"1×12","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"sprint_bike","nome":"Sprint in cyclette","prescr":"5×6\"","rpe":"max","rec":"60\" pedalata libera","tipo":"Esplosivo","note":"Seduto, resistenza medio-alta: spinta solo concentrica, nessun impatto"},{"id":"kb_swing","nome":"Kettlebell swing","prescr":"3×8","rpe":"6","rec":"60\"","tipo":"Esplosivo","note":"Movimento d'anca, ginocchia morbide: non è uno squat","kg":true},{"id":"box_squat","nome":"A1 Box squat – box alto","prescr":"3×8","rpe":"6","rec":"–","tipo":"Forza gambe","note":"Discesa 3\", seduta sopra il parallelo","kg":true},{"id":"db_bench","nome":"A2 Panca piana manubri","prescr":"3×8","rpe":"7","rec":"90\"","tipo":"Forza parte alta","note":"","kg":true},{"id":"hip_thrust","nome":"B1 Hip thrust bilanciere","prescr":"3×10","rpe":"7","rec":"–","tipo":"Forza gambe","note":"Pausa 1\" in alto","kg":true},{"id":"db_press","nome":"B2 Lento avanti manubri seduto","prescr":"3×8","rpe":"7","rec":"90\"","tipo":"Forza parte alta","note":"","kg":true},{"id":"rdl","nome":"C1 Stacco rumeno manubri","prescr":"3×8","rpe":"6","rec":"–","tipo":"Forza gambe","note":"Ginocchia leggermente flesse e ferme","kg":true},{"id":"lext_iso","nome":"C2 Leg extension isometrica a 60°","prescr":"4×30\"","rpe":"6","rec":"60\"","tipo":"Ginocchio","note":"Carico che reggi fermo per 30\" a ginocchio 60°, spinta al 60–70%; dolore max 3/10","kg":true},{"id":"stepdown","nome":"Step-down laterale","prescr":"2×6 per lato","rpe":"6","rec":"45\"","tipo":"Ginocchio","note":"Step 10 cm, discesa 3\", ginocchio in linea con il secondo dito"},{"id":"slider_curl","nome":"Leg curl con slider","prescr":"2×6","rpe":"7","rec":"60\"","tipo":"Ginocchio","note":"Flessori in eccentrica: bacino alto, talloni che scivolano lenti"}],"2":[{"id":"wu_bike","nome":"Cyclette progressiva","prescr":"5'","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Sella alta, resistenza in aumento"},{"id":"wu_band","nome":"Camminata laterale con mini band","prescr":"2×10 per lato","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Band sopra le ginocchia, spingi le ginocchia in fuori"},{"id":"wu_bridge","nome":"Ponte glutei","prescr":"1×12","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"box_jump","nome":"Box jump con discesa a passi","prescr":"4×3","rpe":"max","rec":"90\"","tipo":"Esplosivo","note":"Box 30–40 cm, atterra morbido sul box e scendi camminando"},{"id":"drop_landing","nome":"Atterraggio stabilizzato da 20 cm","prescr":"3×4","rpe":"–","rec":"60\"","tipo":"Ginocchio","note":"Scendi dal gradino e blocca 2\": ginocchia in linea, atterraggio silenzioso"},{"id":"box_squat","nome":"A1 Box squat – box al parallelo","prescr":"4×6","rpe":"7","rec":"–","tipo":"Forza gambe","note":"Discesa 3\"","kg":true},{"id":"db_bench","nome":"A2 Panca piana manubri","prescr":"4×6","rpe":"7–8","rec":"90\"","tipo":"Forza parte alta","note":"","kg":true},{"id":"hip_thrust","nome":"B1 Hip thrust bilanciere","prescr":"3×8","rpe":"8","rec":"–","tipo":"Forza gambe","note":"","kg":true},{"id":"db_press","nome":"B2 Lento avanti manubri seduto","prescr":"3×8","rpe":"7–8","rec":"90\"","tipo":"Forza parte alta","note":"","kg":true},{"id":"rdl_bb","nome":"C1 Stacco rumeno bilanciere","prescr":"3×6","rpe":"7","rec":"–","tipo":"Forza gambe","note":"","kg":true},{"id":"lext_dyn","nome":"C2 Leg extension 90°→30°","prescr":"3×10","rpe":"7","rec":"60\"","tipo":"Ginocchio","note":"Discesa 3\", solo nel range senza dolore","kg":true},{"id":"stepdown","nome":"Step-down laterale","prescr":"3×6 per lato","rpe":"7","rec":"45\"","tipo":"Ginocchio","note":"Step 15–20 cm"},{"id":"nordic","nome":"Nordic curl","prescr":"2×4","rpe":"8","rec":"90\"","tipo":"Ginocchio","note":"Assistito con elastico se non controlli la discesa; cuscino sotto le ginocchia"}],"3":[{"id":"wu_bike","nome":"Cyclette progressiva","prescr":"5'","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Sella alta, resistenza in aumento"},{"id":"wu_band","nome":"Camminata laterale con mini band","prescr":"2×10 per lato","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Band sopra le ginocchia, spingi le ginocchia in fuori"},{"id":"wu_bridge","nome":"Ponte glutei","prescr":"1×12","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"box_jump","nome":"Box jump con discesa a passi","prescr":"4×3","rpe":"max","rec":"90\"","tipo":"Esplosivo","note":"Box 40–50 cm"},{"id":"skater","nome":"Salto laterale con stop","prescr":"3×3 per lato","rpe":"–","rec":"60\"","tipo":"Esplosivo","note":"Salto corto, atterraggio su una gamba bloccato 2\"; allunga solo con semaforo verde"},{"id":"box_squat","nome":"A1 Box squat – box al parallelo","prescr":"4×4","rpe":"8","rec":"–","tipo":"Forza gambe","note":"Discesa controllata, salita più veloce possibile","kg":true},{"id":"db_bench","nome":"A2 Panca piana manubri","prescr":"4×5","rpe":"8","rec":"90\"","tipo":"Forza parte alta","note":"","kg":true},{"id":"hip_thrust","nome":"B1 Hip thrust bilanciere","prescr":"4×6","rpe":"8","rec":"–","tipo":"Forza gambe","note":"Salita esplosiva","kg":true},{"id":"db_press","nome":"B2 Lento avanti manubri seduto","prescr":"3×6","rpe":"8","rec":"90\"","tipo":"Forza parte alta","note":"","kg":true},{"id":"rdl_bb","nome":"C1 Stacco rumeno bilanciere","prescr":"3×5","rpe":"7–8","rec":"–","tipo":"Forza gambe","note":"","kg":true},{"id":"lext_dyn","nome":"C2 Leg extension 90°→30°","prescr":"3×8","rpe":"8","rec":"60\"","tipo":"Ginocchio","note":"Discesa 3\"","kg":true},{"id":"stepdown","nome":"Step-down laterale con manubri","prescr":"3×6 per lato","rpe":"7","rec":"45\"","tipo":"Ginocchio","note":"Step 20 cm","kg":true},{"id":"nordic","nome":"Nordic curl","prescr":"3×4","rpe":"8","rec":"90\"","tipo":"Ginocchio","note":""}]}},"B":{"titolo":"Seduta B – Giovedì","sotto":"Tirata, core, anca e polpacci · 17:30–18:30, poi calcio","fasi":{"1":[{"id":"wu_bike","nome":"Cyclette progressiva","prescr":"5'","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Sella alta, resistenza in aumento"},{"id":"wu_pullapart","nome":"Band pull-apart","prescr":"2×15","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"wu_sl_bridge","nome":"Ponte glutei monopodalico","prescr":"2×8 per lato","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"sprint_bike","nome":"Sprint in cyclette","prescr":"5×6\"","rpe":"max","rec":"60\" pedalata libera","tipo":"Esplosivo","note":"Seduto, resistenza medio-alta"},{"id":"mb_slam","nome":"Med ball slam","prescr":"3×6","rpe":"max","rec":"60\"","tipo":"Esplosivo","note":"","kg":true},{"id":"pullup","nome":"A1 Trazioni","prescr":"3×6","rpe":"7","rec":"–","tipo":"Forza parte alta","note":"Assistite con elastico o macchina se serve","kg":true},{"id":"pallof","nome":"A2 Pallof press","prescr":"2×10 per lato","rpe":"–","rec":"90\"","tipo":"Core","note":"","kg":true},{"id":"row","nome":"B1 Rematore manubrio","prescr":"3×10","rpe":"7","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"deadbug","nome":"B2 Dead bug","prescr":"2×8 per lato","rpe":"–","rec":"60\"","tipo":"Core","note":"Zona lombare sempre a terra"},{"id":"facepull","nome":"C1 Face pull ai cavi","prescr":"2×15","rpe":"7","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"hip_abd","nome":"C2 Abduzione anca (macchina o cavo)","prescr":"3×12","rpe":"7","rec":"60\"","tipo":"Anca","note":"Gluteo medio: controllo del ginocchio in appoggio e nei cambi di direzione","kg":true},{"id":"calf","nome":"D1 Calf raise in piedi","prescr":"3×12","rpe":"7","rec":"–","tipo":"Anca","note":"Discesa 3\"; caviglia dx operata: stessa cura su entrambi i lati","kg":true},{"id":"adductor","nome":"D2 Adduttori alla macchina","prescr":"2×12","rpe":"6","rec":"60\"","tipo":"Anca","note":"Range senza dolore","kg":true},{"id":"wallsit","nome":"Wall sit isometrico","prescr":"3×30\"","rpe":"6","rec":"60\"","tipo":"Ginocchio","note":"Ginocchio a circa 60°, dolore max 3/10"}],"2":[{"id":"wu_bike","nome":"Cyclette progressiva","prescr":"5'","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Sella alta, resistenza in aumento"},{"id":"wu_pullapart","nome":"Band pull-apart","prescr":"2×15","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"wu_sl_bridge","nome":"Ponte glutei monopodalico","prescr":"2×8 per lato","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"sprint_bike","nome":"Sprint in cyclette","prescr":"6×6\"","rpe":"max","rec":"60\" pedalata libera","tipo":"Esplosivo","note":""},{"id":"mb_rot","nome":"Lancio rotazionale med ball al muro","prescr":"3×5 per lato","rpe":"max","rec":"60\"","tipo":"Esplosivo","note":"Spinta da anca e piede posteriore","kg":true},{"id":"pullup","nome":"A1 Trazioni","prescr":"4×5","rpe":"8","rec":"–","tipo":"Forza parte alta","note":"Oltre 8 ripetizioni pulite: aggiungi zavorra","kg":true},{"id":"pallof","nome":"A2 Pallof press","prescr":"3×10 per lato","rpe":"–","rec":"90\"","tipo":"Core","note":"","kg":true},{"id":"row","nome":"B1 Rematore manubrio","prescr":"3×8","rpe":"8","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"side_plank","nome":"B2 Plank laterale","prescr":"3×30\" per lato","rpe":"–","rec":"60\"","tipo":"Core","note":""},{"id":"facepull","nome":"C1 Face pull ai cavi","prescr":"2×15","rpe":"7","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"hip_abd","nome":"C2 Abduzione anca (macchina o cavo)","prescr":"3×12","rpe":"8","rec":"60\"","tipo":"Anca","note":"","kg":true},{"id":"calf_sl","nome":"D1 Calf raise su una gamba","prescr":"3×10 per lato","rpe":"7","rec":"–","tipo":"Anca","note":"Discesa 3\"","kg":true},{"id":"copenhagen","nome":"D2 Copenhagen plank corto","prescr":"2×20\" per lato","rpe":"7","rec":"60\"","tipo":"Anca","note":"Appoggio sulla coscia sopra il ginocchio; se preme sul punto dolente torna alla macchina adduttori"},{"id":"wallsit","nome":"Wall sit isometrico","prescr":"3×45\"","rpe":"6","rec":"60\"","tipo":"Ginocchio","note":""}],"3":[{"id":"wu_bike","nome":"Cyclette progressiva","prescr":"5'","rpe":"–","rec":"–","tipo":"Riscaldamento","note":"Sella alta, resistenza in aumento"},{"id":"wu_pullapart","nome":"Band pull-apart","prescr":"2×15","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"wu_sl_bridge","nome":"Ponte glutei monopodalico","prescr":"2×8 per lato","rpe":"–","rec":"–","tipo":"Riscaldamento","note":""},{"id":"sprint_bike","nome":"Sprint in cyclette","prescr":"8×6\"","rpe":"max","rec":"60\" pedalata libera","tipo":"Esplosivo","note":""},{"id":"mb_rot","nome":"Lancio rotazionale med ball al muro","prescr":"3×5 per lato","rpe":"max","rec":"60\"","tipo":"Esplosivo","note":"","kg":true},{"id":"pogo","nome":"Pogo jump","prescr":"3×10","rpe":"–","rec":"60\"","tipo":"Esplosivo","note":"Saltelli sulle caviglie, ginocchia quasi tese, contatto breve"},{"id":"pullup","nome":"A1 Trazioni zavorrate","prescr":"4×4","rpe":"8","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"pallof","nome":"A2 Pallof press","prescr":"3×12 per lato","rpe":"–","rec":"90\"","tipo":"Core","note":"","kg":true},{"id":"row","nome":"B1 Rematore manubrio","prescr":"3×8","rpe":"8","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"side_plank","nome":"B2 Plank laterale","prescr":"3×40\" per lato","rpe":"–","rec":"60\"","tipo":"Core","note":""},{"id":"facepull","nome":"C1 Face pull ai cavi","prescr":"2×15","rpe":"7","rec":"–","tipo":"Forza parte alta","note":"","kg":true},{"id":"hip_abd","nome":"C2 Abduzione anca (macchina o cavo)","prescr":"3×10","rpe":"8","rec":"60\"","tipo":"Anca","note":"","kg":true},{"id":"calf_sl","nome":"D1 Calf raise su una gamba con manubrio","prescr":"3×8 per lato","rpe":"8","rec":"–","tipo":"Anca","note":"","kg":true},{"id":"copenhagen","nome":"D2 Copenhagen plank corto","prescr":"3×25\" per lato","rpe":"7","rec":"60\"","tipo":"Anca","note":""},{"id":"wallsit","nome":"Wall sit isometrico","prescr":"3×45\"","rpe":"6","rec":"60\"","tipo":"Ginocchio","note":""}]}}},"attivazioni":{"breve":{"titolo":"Attivazione breve al campo","quando":"Martedì e giovedì, arrivando dalla palestra · 8'","items":[{"id":"ab_jog","nome":"Corsetta leggera o skip bassi","prescr":"2'"},{"id":"ab_band","nome":"Camminata laterale con mini band","prescr":"1×10 per lato"},{"id":"ab_iso","nome":"Squat isometrico tenendosi al palo (ginocchio a 60°)","prescr":"2×30\""},{"id":"ab_ankle","nome":"Ginocchio al palo per la caviglia","prescr":"1×10 per lato"},{"id":"ab_accel","nome":"Allunghi progressivi 60→80% con frenata lunga in 5–6 passi","prescr":"3×20 m"}]},"completa":{"titolo":"Attivazione completa","quando":"Domenica prima del riscaldamento di squadra · 15'. Sabato a casa: solo i punti 2–6","items":[{"id":"ac_jog","nome":"Corsetta leggera","prescr":"3'"},{"id":"ac_band","nome":"Camminata laterale con mini band","prescr":"2×10 per lato"},{"id":"ac_bridge","nome":"Ponte glutei monopodalico","prescr":"2×8 per lato"},{"id":"ac_iso","nome":"Squat isometrico tenendosi al palo (ginocchio a 60°)","prescr":"3×30\""},{"id":"ac_step","nome":"Step-down laterale da gradino basso","prescr":"2×6 per lato"},{"id":"ac_ankle","nome":"Ginocchio al muro per la caviglia","prescr":"2×10 per lato"},{"id":"ac_skip","nome":"Skip e calciata","prescr":"2×15 m"},{"id":"ac_accel","nome":"Allunghi progressivi con frenata lunga (Fase 3: + 3 frenate in 3 passi al 70%)","prescr":"4×20 m"}]}},"mobilita":{"titolo":"Routine mobilità","quando":"Lunedì, mercoledì e venerdì · 12–15'","items":[{"id":"mo_heel","nome":"Scivolamento del tallone da supino (flesso-estensione senza carico)","prescr":"2×15"},{"id":"mo_tke","nome":"Estensione terminale del ginocchio con elastico","prescr":"2×15"},{"id":"mo_ankle","nome":"Ginocchio al muro per la caviglia (insisti sulla dx)","prescr":"2×10 per lato"},{"id":"mo_hipflex","nome":"Allungamento flessori dell'anca in affondo, cuscino sotto il ginocchio","prescr":"2×40\" per lato"},{"id":"mo_9090","nome":"Rotazioni d'anca 90/90","prescr":"2×8"},{"id":"mo_ham","nome":"Gamba tesa su e giù da supino con elastico","prescr":"2×10 per lato"},{"id":"mo_foam","nome":"Foam roller su quadricipite, adduttori e polpaccio, senza premere sul punto dolente","prescr":"60\" per zona"}]},"recupero":{"1":{"titolo":"Lunedì – recupero dalla partita","items":[{"id":"rec_bike","nome":"Cyclette facile","prescr":"20'"}],"extra":"Ghiaccio 10–15' se il ginocchio è gonfio o dolente."},"3":{"titolo":"Mercoledì – recupero attivo","items":[{"id":"rec_bike","nome":"Cyclette facile","prescr":"25–30'"}],"extra":""},"5":{"titolo":"Venerdì – recupero","items":[{"id":"rec_bike_opt","nome":"Cyclette facile (facoltativa)","prescr":"15'"}],"extra":""}},"cyclette":"Sella alta: con il pedale in basso il ginocchio è quasi teso. Resistenza bassa, 80–90 pedalate al minuto, intensità a cui riesci a parlare senza fatica.","lavoro":["Ogni 45–60 minuti alzati 1–2 minuti e cammina.","Da seduto tieni la gamba sinistra distesa sotto la scrivania quando puoi.","Una volta all'ora fai 10 contrazioni del quadricipite a ginocchio teso, tenendo 5 secondi."],"sonno":"Dormi 6–7 ore e le senti poche: punta a 7,5. È la parte del recupero che nessun esercizio sostituisce.","semaforo":[{"col":"verde","titolo":"Verde","cond":"Dolore al mattino 0–2, nessun gonfiore, rigidità come al solito.","azione":"Piano normale."},{"col":"giallo","titolo":"Giallo","cond":"Dolore al mattino 3–4 oppure rigidità peggiore del solito, senza gonfiore.","azione":"Seduta A senza salti, una serie in meno sugli esercizi di gambe, RPE massimo 6. Seduta B normale. Al calcio evita le partitelle a tutta, parlandone con il mister. Non progredire i carichi."},{"col":"rosso","titolo":"Rosso","cond":"Ginocchio gonfio o movimento meno liscio, oppure dolore al mattino 5 o più.","azione":"Niente carico sulle gambe e niente calcio quel giorno. Solo parte alta, isometrie senza dolore e cyclette leggera se non fa male. Ghiaccio. Se resta rosso 3 giorni o torna spesso, fallo vedere."}],"regoleDolore":["Durante un esercizio il dolore può arrivare a 3/10. Oltre, fermati: riduci carico o range, oppure salta quell'esercizio.","Il gonfiore conta più del dolore: se compare, la seduta di gambe successiva si riduce anche se il dolore è basso.","Se in una settimana hai 2 o più gialli, la settimana dopo ripeti gli stessi carichi senza progredire."],"rientro":[{"passo":1,"calcio":"Riscaldamento con la squadra, corsa lineare e tecnica. Niente partitelle e niente cambi di direzione a tutta.","partita":"No","avanza":"2 allenamenti con la mattina dopo verde."},{"passo":2,"calcio":"Allenamento completo, partitelle a intensità controllata o solo una parte.","partita":"Spezzone fino a 45', se il mister è d'accordo","avanza":"Una settimana con al massimo 1 giallo e nessun rosso."},{"passo":3,"calcio":"Allenamento completo.","partita":"Partita intera","avanza":"–"}],"rientroNota":"Un giorno rosso ti riporta al passo precedente.","rpe":[{"rpe":"6","rir":"4 ripetizioni in riserva"},{"rpe":"7","rir":"3 ripetizioni in riserva"},{"rpe":"8","rir":"2 ripetizioni in riserva"},{"rpe":"max","rir":"Massima intenzione di velocità, poche ripetizioni, mai a fatica"}],"progressione":"Parti con carichi prudenti e segnali nel tracker. Quando per 2 sedute di fila completi tutte le serie sotto l'RPE indicato e con semaforo verde, aumenta di 2,5 kg (manubri: il peso successivo). Con semaforo giallo non si aumenta."};
+const LS_KEY = "leo-stagione-2627";
+const DAYS = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+const MONTHS = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const TAGCLASS = {"Riscaldamento":"--t-risc","Esplosivo":"--t-esp","Forza gambe":"--t-gam","Forza parte alta":"--t-alt","Ginocchio":"--t-gin","Core":"--t-core","Anca":"--t-anca"};
+
+const state = { tab:"oggi", date: iso(new Date()), logs:{}, settings:{ start: PLAN.startDefault, step: 1 }, db:null, synced:false };
+
+function iso(d){ const z=new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
+function parse(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function addDays(s,n){ const d=parse(s); d.setDate(d.getDate()+n); return iso(d); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmtShort(s){ const d=parse(s); return `${DAYS[d.getDay()].slice(0,3)} ${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`; }
+
+/* ---------- storage ---------- */
+try{ const raw=localStorage.getItem(LS_KEY); if(raw){ const o=JSON.parse(raw); state.logs=o.logs||{}; state.settings={...state.settings,...(o.settings||{})}; } }catch(e){}
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({logs:state.logs, settings:state.settings})); }catch(e){} }
+
+const pending = {}; const inflight = {}; const timers = {};
+function scheduleWrite(path, getData){
+  pending[path]=getData; clearTimeout(timers[path]);
+  timers[path]=setTimeout(()=>flush(path), 700);
+}
+async function flush(path){
+  if(!state.db || !pending[path] || inflight[path]) return;
+  const getData=pending[path]; delete pending[path]; inflight[path]=true;
+  try{ await state.db.doc(path).set(getData()); }
+  catch(e){ if(e && e.code==="unavailable"){ pending[path]=getData; setTimeout(()=>{inflight[path]=false; flush(path);}, 1200+Math.random()*800); return; } console.warn(e); }
+  inflight[path]=false;
+  if(pending[path]) flush(path);
+}
+function entry(date){ return state.logs[date] || (state.logs[date]={morning:{pain:null,swelling:false,stiff:false},done:{},kg:{},football:null,painDuring:null,note:""}); }
+function touch(date){ state.logs[date].updated=Date.now(); saveLocal(); scheduleWrite("log/"+date, ()=>state.logs[date]); }
+function touchSettings(){ saveLocal(); scheduleWrite("settings/main", ()=>state.settings); }
+
+// App installata: dati su questo telefono + service worker per uso offline
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(()=>{}); }
+function isTyping(){ const a=document.activeElement; return a && (a.tagName==="INPUT"||a.tagName==="TEXTAREA"); }
+
+/* ---------- logica piano ---------- */
+function weekInfo(date){
+  const w=Math.floor((parse(date)-parse(state.settings.start))/(7*864e5))+1;
+  if(w<1) return {w, pre:true};
+  let fase, scarico=false;
+  if(w<=3) fase=1; else if(w<=8){ fase=2; scarico=w===8; } else if(w<=13){ fase=3; scarico=w===13; } else { fase=4; scarico=((w-14)%4)===3; }
+  return {w, fase, scarico, sessFase: Math.min(fase,3)};
+}
+function light(m){
+  if(!m) return null;
+  if(m.swelling || (m.pain!=null && m.pain>=5)) return "rosso";
+  if((m.pain!=null && m.pain>=3) || m.stiff) return "giallo";
+  if(m.pain!=null) return "verde";
+  return null;
+}
+function dayPlan(date){
+  const wi=weekInfo(date); const dow=parse(date).getDay(); const groups=[];
+  if(wi.pre){
+    groups.push({title:"Cyclette facile", items:[{id:"pre_bike",nome:"Cyclette facile",prescr:"20'"}]});
+    groups.push({title:PLAN.mobilita.titolo, items:PLAN.mobilita.items});
+    return {kind:"pre", groups, wi};
+  }
+  if(dow===2||dow===4){
+    const s=PLAN.sedute[dow===2?"A":"B"];
+    groups.push({title:s.titolo, sub:s.sotto, items:s.fasi[wi.sessFase], session:true});
+    groups.push({title:PLAN.attivazioni.breve.titolo, sub:PLAN.attivazioni.breve.quando, items:PLAN.attivazioni.breve.items});
+    return {kind:"calcio", groups, wi, football:"allenamento"};
+  }
+  if(dow===1||dow===3||dow===5){
+    const r=PLAN.recupero[dow];
+    groups.push({title:r.titolo, sub:r.extra, items:r.items});
+    groups.push({title:PLAN.mobilita.titolo, items:PLAN.mobilita.items});
+    return {kind:"recupero", groups, wi};
+  }
+  if(dow===6){
+    groups.push({title:"Attivazione a casa", sub:"Senza corsa, 10'", items:PLAN.attivazioni.completa.items.slice(1,6)});
+    return {kind:"sabato", groups, wi};
+  }
+  groups.push({title:PLAN.attivazioni.completa.titolo, sub:"Prima del riscaldamento di squadra", items:PLAN.attivazioni.completa.items});
+  return {kind:"partita", groups, wi, football:"partita"};
+}
+function lastKg(id, before){
+  const dates=Object.keys(state.logs).filter(d=>d<before).sort().reverse();
+  for(const d of dates){ const v=state.logs[d].kg && state.logs[d].kg[id]; if(v) return {v, d}; }
+  return null;
+}
+function completion(date){
+  const e=state.logs[date]; if(!e) return null;
+  const items=dayPlan(date).groups.flatMap(g=>g.items); if(!items.length) return null;
+  const n=items.filter(i=>e.done && e.done[i.id]).length;
+  return Math.round(100*n/items.length);
+}
+
+/* ---------- render ---------- */
+const view=document.getElementById("view");
+function render(){
+  const d=parse(state.date); const wi=weekInfo(state.date);
+  document.getElementById("dateTitle").textContent = `${DAYS[d.getDay()][0].toUpperCase()+DAYS[d.getDay()].slice(1)} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  document.getElementById("dateSub").textContent = wi.pre ? `Il piano parte ${fmtShort(state.settings.start)}` : `Settimana ${wi.w}, fase ${wi.fase} ${PLAN.fasi[wi.fase-1].nome}${wi.scarico?", scarico":""}`;
+  document.getElementById("goToday").hidden = state.date===iso(new Date());
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===state.tab));
+  document.querySelector("header.top").style.display = state.tab==="oggi" ? "" : "none";
+  ({oggi:renderDay, storico:renderHistory, regole:renderRules, impostazioni:renderSettings})[state.tab]();
+}
+
+function renderDay(){
+  const e=entry(state.date); const p=dayPlan(state.date); const L=light(e.morning);
+  const sem = L ? PLAN.semaforo.find(s=>s.col===L) : null;
+  let h=`<section class="card" aria-labelledby="semT">
+    <h2 id="semT">Ginocchio stamattina</h2><p class="hint">Dolore appena alzato, da 0 a 10</p>
+    <div class="scale" role="group" aria-label="Dolore al mattino">${Array.from({length:11},(_,i)=>`<button data-pain="${i}" aria-pressed="${e.morning.pain===i}">${i}</button>`).join("")}</div>
+    <div class="toggles">
+      <button class="toggle" data-flag="swelling" aria-pressed="${!!e.morning.swelling}">Gonfio o movimento meno liscio</button>
+      <button class="toggle" data-flag="stiff" aria-pressed="${!!e.morning.stiff}">Più rigido del solito</button>
+    </div>
+    <div class="light ${L||""}" aria-live="polite">
+      <div class="lamp">${L?"":"?"}</div>
+      <div>${sem?`<h3>${sem.titolo}</h3><p>${esc(sem.azione)}</p>`:`<h3>Da valutare</h3><p>Segna il dolore per sapere cosa fare oggi.</p>`}</div>
+    </div>
+  </section>`;
+
+  if(p.wi.scarico) h+=`<div class="banner">${esc(PLAN.scarico)}</div>`;
+  if(p.wi.fase===4 && !p.wi.scarico) h+=`<div class="banner">Fase 4: fai gli esercizi di forza a 3 serie invece di 4.</div>`;
+  if(p.kind==="pre") h+=`<div class="banner">Prima dell'inizio del piano: solo cyclette facile e mobilità, per arrivare con il ginocchio tranquillo.</div>`;
+
+  const all=p.groups.flatMap(g=>g.items); const nDone=all.filter(i=>e.done[i.id]).length;
+  h+=`<section class="card"><h2>${p.kind==="calcio"?"Palestra e campo":p.kind==="partita"?"Giorno partita":p.kind==="sabato"?"Vigilia":"Recupero"}</h2>
+    <p class="hint">${nDone} di ${all.length} completati</p><div class="progress"><i style="width:${all.length?100*nDone/all.length:0}%"></i></div>`;
+  p.groups.forEach(g=>{
+    h+=`<div class="group-title">${esc(g.title)}</div>${g.sub?`<p class="hint">${esc(g.sub)}</p>`:""}<ul class="ex">`;
+    g.items.forEach(it=>{
+      const done=!!e.done[it.id]; const last=it.kg?lastKg(it.id,state.date):null;
+      h+=`<li class="${done?"done":""}">
+        <button class="chk" data-done="${esc(it.id)}" aria-pressed="${done}" aria-label="Fatto: ${esc(it.nome)}"></button>
+        <div><div class="name">${esc(it.nome)}</div>
+          <div class="meta"><b>${esc(it.prescr)}</b>${it.rpe&&it.rpe!=="–"?` RPE ${esc(it.rpe)}`:""}${it.rec&&it.rec!=="–"?`, rec. ${esc(it.rec)}`:""}</div>
+          ${it.tipo?`<div class="meta"><span class="tag" style="background:var(${TAGCLASS[it.tipo]||"--t-risc"})">${esc(it.tipo)}</span></div>`:""}
+          ${it.note?`<div class="note">${esc(it.note)}</div>`:""}
+        </div>
+        ${it.kg?`<div class="kg"><input inputmode="decimal" aria-label="Kg ${esc(it.nome)}" data-kg="${esc(it.id)}" value="${esc(e.kg[it.id]||"")}" placeholder="kg"><small>${last?`prima: ${esc(last.v)} kg`:"nuovo"}</small></div>`:"<span></span>"}
+      </li>`;
+    });
+    h+=`</ul>`;
+  });
+  h+=`</section>`;
+
+  if(p.football){
+    const st=state.settings.step||1; const r=PLAN.rientro[st-1];
+    const opts = p.football==="partita" ? ["Intera","Spezzone","Non giocata"] : ["Completo","Parziale","Saltato"];
+    h+=`<section class="card"><h2>${p.football==="partita"?"Partita 15:30":"Calcio 19:30–21:00"}</h2>
+      ${st<3?`<p class="hint">Rientro, passo ${st}: ${esc(p.football==="partita"?r.partita:r.calcio)}</p>`:`<p class="hint">Rientro completato.</p>`}
+      <div class="seg" role="group">${opts.map(o=>`<button data-foot="${o}" aria-pressed="${e.football===o}">${o}</button>`).join("")}</div>
+    </section>`;
+  }
+  if(p.kind!=="pre"){
+    h+=`<section class="card"><h2>Com'è andata</h2>
+      <p class="hint">Dolore massimo durante l'attività di oggi</p>
+      <div class="scale" role="group" aria-label="Dolore durante">${Array.from({length:11},(_,i)=>`<button data-during="${i}" aria-pressed="${e.painDuring===i}">${i}</button>`).join("")}</div>
+      ${e.painDuring!=null&&e.painDuring>3?`<div class="banner" style="background:var(--warn-soft)">Oltre 3/10: domani controlla bene il semaforo e riduci l'esercizio che ha dato fastidio.</div>`:""}
+      <label class="fld" for="note">Note</label>
+      <textarea id="note" placeholder="Esercizi che hanno dato fastidio, sensazioni, carichi da rivedere">${esc(e.note)}</textarea>
+    </section>`;
+  }
+  h+=`<p class="sync">Dati salvati su questo telefono</p>`;
+  view.innerHTML=h;
+}
+
+function renderHistory(){
+  const today=iso(new Date()); const days=[]; for(let i=0;i<28;i++) days.push(addDays(today,-i));
+  const pts=days.slice().reverse().map((d,i)=>({i, v: state.logs[d]?.updated?state.logs[d].morning.pain:null, L: light(state.logs[d]?.morning)}));
+  const W=520,H=150,pad=24, x=i=>pad+i*(W-2*pad)/27, y=v=>H-pad-(v/10)*(H-2*pad);
+  const line=pts.filter(p=>p.v!=null).map((p,k)=>`${k?"L":"M"}${x(p.i).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const col={verde:"var(--go)",giallo:"var(--warn)",rosso:"var(--stop)"};
+  const svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Dolore al mattino negli ultimi 28 giorni">
+    ${[0,3,5,10].map(v=>`<line x1="${pad}" x2="${W-pad}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="${v?"3 4":"0"}"/><text x="4" y="${y(v)+4}" font-size="11" fill="var(--muted)">${v}</text>`).join("")}
+    ${line?`<path d="${line}" fill="none" stroke="var(--ink)" stroke-width="2"/>`:""}
+    ${pts.filter(p=>p.v!=null).map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="5" fill="${col[p.L]||"var(--muted)"}"/>`).join("")}
+  </svg>`;
+  const counts={verde:0,giallo:0,rosso:0}; days.slice(0,7).forEach(d=>{const L=light(state.logs[d]?.morning); if(L) counts[L]++;});
+  let h=`<section class="card"><h2>Ultimi 28 giorni</h2><p class="hint">Dolore al mattino. Linee tratteggiate a 3 e 5: confini di giallo e rosso.</p><div class="chart">${svg}</div>
+    <div class="banner">Ultimi 7 giorni: ${counts.verde} verdi, ${counts.giallo} gialli, ${counts.rosso} rossi.${counts.giallo>=2?" Con 2 o più gialli, la settimana prossima ripeti i carichi senza aumentare.":""}</div></section>`;
+  h+=`<section class="card"><h2>Giorno per giorno</h2><ul class="hist">`;
+  days.forEach(d=>{
+    const e=state.logs[d]?.updated?state.logs[d]:null; const L=light(e?.morning); const c=e?completion(d):null;
+    h+=`<li><button data-open="${d}" aria-label="Apri ${fmtShort(d)}"><span class="dot ${L||""}"></span><span><span class="d">${fmtShort(d)}</span><div class="meta">${e?.football?esc(e.football)+". ":""}${e?.note?esc(e.note.slice(0,60)):""}</div></span><span class="r">${e?.morning?.pain!=null?`dolore ${e.morning.pain}`:"–"}${c!=null?`<br>${c}%`:""}</span></button></li>`;
+  });
+  h+=`</ul></section>`;
+  view.innerHTML=h;
+}
+
+function renderRules(){
+  let h=`<section class="card"><h2>Semaforo</h2><p class="hint">Ogni mattina, prima delle scale.</p>
+    ${PLAN.semaforo.map(s=>`<div class="rule ${s.col}"><h3>${s.titolo}</h3><p>${esc(s.cond)}</p><p><strong>${esc(s.azione)}</strong></p></div>`).join("")}
+    ${PLAN.regoleDolore.map(r=>`<p>${esc(r)}</p>`).join("")}</section>`;
+  h+=`<section class="card"><h2>Rientro in squadra</h2><div class="tbl"><table><thead><tr><th>Passo</th><th>Allenamenti</th><th>Partita</th><th>Per avanzare</th></tr></thead><tbody>
+    ${PLAN.rientro.map(r=>`<tr><td><strong>${r.passo}</strong></td><td>${esc(r.calcio)}</td><td>${esc(r.partita)}</td><td>${esc(r.avanza)}</td></tr>`).join("")}</tbody></table></div><p class="hint" style="margin-top:8px">${esc(PLAN.rientroNota)}</p></section>`;
+  h+=`<section class="card"><h2>Fasi</h2><div class="tbl"><table><thead><tr><th>Fase</th><th>Settimane</th><th>Cosa cambia</th></tr></thead><tbody>
+    ${PLAN.fasi.map(f=>`<tr><td><strong>${f.n}. ${esc(f.nome)}</strong></td><td>${esc(f.settimane)}</td><td>${esc(f.cambia)}</td></tr>`).join("")}</tbody></table></div>
+    <p>${esc(PLAN.scarico)}</p><p>${esc(PLAN.pausaInvernale)}</p></section>`;
+  h+=`<section class="card"><h2>RPE e carichi</h2>${PLAN.rpe.map(r=>`<p><strong>RPE ${esc(r.rpe)}</strong>: ${esc(r.rir)}</p>`).join("")}<p>${esc(PLAN.progressione)}</p></section>`;
+  h+=`<section class="card"><h2>Cyclette, lavoro e sonno</h2><p>${esc(PLAN.cyclette)}</p>${PLAN.lavoro.map(l=>`<p>${esc(l)}</p>`).join("")}<p>${esc(PLAN.sonno)}</p></section>`;
+  view.innerHTML=h;
+}
+
+function renderSettings(){
+  const st=state.settings.step||1;
+  view.innerHTML=`<section class="card"><h2>Inizio del piano</h2><p class="hint">Il lunedì della settimana 1. Da qui dipendono settimana e fase.</p>
+    <input type="date" id="start" value="${esc(state.settings.start)}"></section>
+    <section class="card"><h2>Passo di rientro in squadra</h2><p class="hint">Avanza solo quando rispetti il criterio; un giorno rosso ti riporta indietro.</p>
+    <div class="seg" role="group">${[1,2,3].map(n=>`<button data-step="${n}" aria-pressed="${st===n}">Passo ${n}</button>`).join("")}</div>
+    <p style="margin-top:12px">${esc(PLAN.rientro[st-1].calcio)} Partita: ${esc(PLAN.rientro[st-1].partita)}.</p></section>
+    <section class="card"><h2>Backup dei dati</h2>
+    <p class="hint">I dati restano su questo telefono. Salva un backup ogni settimana: se cambi telefono o cancelli i dati del browser, lo reimporti da qui.</p>
+    <p>Ultimo backup: <strong>${state.settings.lastBackup?fmtShort(state.settings.lastBackup):"mai"}</strong></p>
+    <div class="row"><button class="btn" id="exportBtn">Salva backup</button><button class="btn ghost" id="importBtn">Importa backup</button></div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <p class="hint" id="backupMsg" style="margin-top:10px" aria-live="polite"></p></section>
+    <p class="sync">Versione app 1.0</p>`;
+}
+
+/* ---------- eventi ---------- */
+document.addEventListener("click", ev=>{
+  const b=ev.target.closest("button"); if(!b) return;
+  if(b.dataset.tab){ state.tab=b.dataset.tab; render(); window.scrollTo(0,0); return; }
+  if(b.id==="prev"){ state.date=addDays(state.date,-1); render(); return; }
+  if(b.id==="next"){ state.date=addDays(state.date,1); render(); return; }
+  if(b.id==="goToday"){ state.date=iso(new Date()); render(); return; }
+  if(b.dataset.open){ state.date=b.dataset.open; state.tab="oggi"; render(); window.scrollTo(0,0); return; }
+  if(b.dataset.step){ state.settings.step=Number(b.dataset.step); touchSettings(); render(); return; }
+  const e=entry(state.date);
+  if(b.dataset.pain!=null){ const v=Number(b.dataset.pain); e.morning.pain = e.morning.pain===v?null:v; }
+  else if(b.dataset.flag){ e.morning[b.dataset.flag]=!e.morning[b.dataset.flag]; }
+  else if(b.dataset.done){ e.done[b.dataset.done]=!e.done[b.dataset.done]; if(!e.done[b.dataset.done]) delete e.done[b.dataset.done]; }
+  else if(b.dataset.foot){ e.football = e.football===b.dataset.foot?null:b.dataset.foot; }
+  else if(b.dataset.during!=null){ const v=Number(b.dataset.during); e.painDuring = e.painDuring===v?null:v; }
+  else return;
+  touch(state.date); const y=window.scrollY; render(); window.scrollTo(0,y);
+});
+document.addEventListener("input", ev=>{
+  const t=ev.target;
+  if(t.dataset.kg){ const e=entry(state.date); const v=t.value.replace(",",".").trim(); if(v) e.kg[t.dataset.kg]=v; else delete e.kg[t.dataset.kg]; touch(state.date); }
+  if(t.id==="note"){ const e=entry(state.date); e.note=t.value; touch(state.date); }
+});
+document.addEventListener("change", ev=>{
+  if(ev.target.id==="start" && ev.target.value){ state.settings.start=ev.target.value; touchSettings(); render(); }
+});
+document.addEventListener("focusout", ()=>{ setTimeout(()=>{ if(!isTyping() && state.tab!=="oggi") render(); },0); });
+
+/* ---------- backup ---------- */
+async function exportBackup(){
+  const today=iso(new Date());
+  const data={app:"leo-stagione-2627",version:1,exported:today,settings:{...state.settings,lastBackup:today},logs:state.logs};
+  const name=`backup-stagione-${today}.json`;
+  const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+  const msg=document.getElementById("backupMsg");
+  try{
+    const file=new File([blob],name,{type:"application/json"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:name}); }
+    else { const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000); }
+    state.settings.lastBackup=today; saveLocal(); render();
+    document.getElementById("backupMsg").textContent="Backup creato: salvalo su Drive o inviatelo per non perderlo.";
+  }catch(e){ if(e && e.name==="AbortError"){ msg.textContent="Backup annullato."; } else { msg.textContent="Backup non riuscito: riprova."; } }
+}
+function importBackup(file){
+  const msg=document.getElementById("backupMsg");
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result);
+      if(o.app!=="leo-stagione-2627"||!o.logs) throw new Error("formato");
+      let n=0;
+      for(const [d,e] of Object.entries(o.logs)){ const cur=state.logs[d]; if(!cur||(e.updated||0)>(cur.updated||0)){ state.logs[d]=e; n++; } }
+      state.settings={...state.settings,...o.settings};
+      saveLocal(); render();
+      document.getElementById("backupMsg").textContent=`Importat${n===1?"o 1 giorno":"i "+n+" giorni"}. Dove il telefono aveva dati più recenti, sono stati mantenuti quelli.`;
+    }catch(e){ msg.textContent="Il file non è un backup di questa app."; }
+  };
+  r.readAsText(file);
+}
+document.addEventListener("click", ev=>{
+  if(ev.target.id==="exportBtn") exportBackup();
+  if(ev.target.id==="importBtn") document.getElementById("importFile").click();
+});
+document.addEventListener("change", ev=>{ if(ev.target.id==="importFile" && ev.target.files[0]) importBackup(ev.target.files[0]); });
+render();
+</script>
+</body>
+</html>
