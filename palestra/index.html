@@ -59,7 +59,7 @@ header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;fle
 .brand{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;margin-right:auto;white-space:nowrap}
 .brand small{font-weight:500;color:var(--muted);font-size:.95rem;margin-left:6px}
 nav.tabs{display:flex;gap:6px}
-nav.tabs a{display:flex;align-items:center;gap:6px;text-decoration:none;font-family:var(--display);font-weight:600;font-size:1.05rem;padding:6px 12px 6px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+nav.tabs a{white-space:nowrap;display:flex;align-items:center;gap:6px;text-decoration:none;font-family:var(--display);font-weight:600;font-size:1.05rem;padding:6px 12px 6px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 nav.tabs a .disc{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;background:var(--sunk);color:var(--muted)}
 nav.tabs a[data-day="a"] .disc{background:var(--a);color:var(--on-a)}
 nav.tabs a[data-day="b"] .disc{background:var(--b);color:var(--on-b)}
@@ -152,6 +152,11 @@ th{font-family:var(--display);font-weight:600;font-size:1rem;color:var(--muted);
 td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:6px}
 .rules{margin:0;padding-left:1.1em;display:grid;gap:8px;max-width:65ch}
+.ph-h{font-size:1.15rem;font-weight:600;margin:16px 0 6px}
+.phr{list-style:none;font-size:.92rem;line-height:1.4;background:var(--sunk);border-radius:8px;padding:4px 12px;margin:0 0 8px;max-width:65ch;user-select:text;-webkit-user-select:text}
+.phr li{padding:7px 0;border-bottom:1px solid var(--line)}
+.phr li:last-child{border-bottom:0}
+.ph-msg{margin-top:10px;color:var(--muted);font-size:.92rem;min-height:1.2em}
 
 @media (max-width:460px){
   .card{grid-template-columns:104px 1fr;gap:10px;padding:10px}
@@ -738,6 +743,32 @@ async function doSave(day){
   }finally{ saving=false; btn.disabled=false; }
 }
 
+/* ---------- Reminder phrases (pasted into iOS Shortcuts) ---------- */
+const PHRASES_TRAIN = [
+  "Oggi si allena. Riscaldamento, poi il primo esercizio: il resto viene da sé.",
+  "Giorno di palestra. Le ginocchia forti si costruiscono una serie alla volta.",
+  "Oggi tocca a te. Un'ora sola, e il te di domani ringrazia.",
+  "Nessuno si è mai pentito di un allenamento fatto. Borsa pronta?",
+  "Oggi alleni core e schiena: è quello che ti tiene in campo.",
+  "Non serve la seduta perfetta, serve la seduta fatta. Si parte.",
+  "Ricordati: RIR 2. Spingi forte, ma con la tecnica giusta.",
+  "Ogni serie segnata nella scheda è un passo avanti. Oggi aggiungine qualcuna.",
+  "La costanza batte la motivazione. Oggi è giorno di palestra.",
+  "Le ginocchia ringraziano chi le allena. Oggi è il loro turno.",
+  "Controlla i carichi dell'ultima volta e prova a battere almeno una serie.",
+  "Un'ora per te: telefono in borsa, testa sugli esercizi."
+];
+const PHRASES_REST = [
+  "Oggi niente da fare, magari fai una corsetta.",
+  "Giorno di riposo: i muscoli crescono adesso. Al massimo una passeggiata.",
+  "Oggi riposo. Se hai voglia di muoverti, 20 minuti di corsa leggera.",
+  "Niente palestra oggi. Dormi bene e bevi acqua: anche questo è allenamento.",
+  "Riposo attivo: una corsetta tranquilla o un po' di mobilità, senza strafare.",
+  "Oggi recuperi, così alla prossima seduta spingi di più.",
+  "Giornata libera dai pesi. Se ti va, una corsetta all'aria aperta.",
+  "Riposo meritato. Dieci minuti di mobilità per anche e caviglie e sei a posto."
+];
+
 /* ---------- Guide ---------- */
 function renderGuide(){
   const v=document.createElement("section"); v.className="view guide"; v.dataset.day="guida"; v.id="view-guida"; v.hidden=true;
@@ -791,7 +822,32 @@ function renderGuide(){
     </ul>
     <p style="margin-top:10px">Il face pull si fa da seduti alla postazione del pulley basso, subito dopo averlo usato per il pulley.</p>
     <p>I pulsanti video aprono una ricerca YouTube mirata sull'esercizio: scegli un video che mostri la tecnica di lato e per intero.</p>
+  </div>
+  <div class="panel" id="promemoria">
+    <h2>Promemoria alle 16:55</h2>
+    <p>L'iPhone non permette a una pagina web di programmare notifiche da sola. Le imposti una volta con l'app <b>Comandi</b>: un'automazione per i giorni di allenamento e una per quelli di riposo. Ogni giorno scelgono a caso una delle frasi qui sotto.</p>
+    <ol class="rules">
+      <li>Apri <b>Comandi</b>, vai nella scheda <b>Automazione</b> e tocca <b>+</b> (o <b>Nuova automazione</b>). Scegli <b>Ora del giorno</b>.</li>
+      <li>Imposta <b>16:55</b>, ripeti <b>Settimanalmente</b> e seleziona <b>lunedì, mercoledì e venerdì</b>. Scegli <b>Esegui immediatamente</b> e disattiva <b>Notifica quando eseguito</b>. Tocca <b>Avanti</b>, poi <b>Nuovo comando vuoto</b>.</li>
+      <li>Aggiungi l'azione <b>Testo</b> e incolla le frasi di allenamento: le copi con il pulsante qui sotto.</li>
+      <li>Aggiungi l'azione <b>Dividi testo</b> e lascia <b>Nuove righe</b>. Poi aggiungi <b>Ottieni elemento da elenco</b> e scegli <b>Elemento casuale</b>.</li>
+      <li>Aggiungi l'azione <b>Mostra notifica</b>. Come testo lascia la variabile <b>Elemento dall'elenco</b>, come titolo scrivi <b>Palestra</b>. Tocca <b>Fine</b>.</li>
+      <li>Ripeti i passaggi per i giorni di riposo: <b>martedì, giovedì, sabato e domenica</b>, con le frasi di riposo.</li>
+    </ol>
+    <h3 class="ph-h">Frasi per i giorni di allenamento</h3>
+    <ul class="phr">${PHRASES_TRAIN.map(t=>`<li>${t}</li>`).join("")}</ul>
+    <button class="btn" type="button" data-copy="train">Copia frasi allenamento</button>
+    <h3 class="ph-h">Frasi per i giorni di riposo</h3>
+    <ul class="phr">${PHRASES_REST.map(t=>`<li>${t}</li>`).join("")}</ul>
+    <button class="btn" type="button" data-copy="rest">Copia frasi riposo</button>
+    <p class="ph-msg" aria-live="polite"></p>
+    <p>Se la notifica non arriva, apri <b>Impostazioni → Notifiche → Comandi</b> e attiva <b>Consenti notifiche</b>. Se cambi i giorni di allenamento, modifica i giorni nelle due automazioni.</p>
   </div>`;
+  v.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
+    const text=(b.dataset.copy==="train"?PHRASES_TRAIN:PHRASES_REST).join("\n"), msg=v.querySelector(".ph-msg");
+    const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=text; ta.setAttribute("readonly",""); ta.style.cssText="position:fixed;top:0;left:0;opacity:0"; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,text.length); let ok=false; try{ ok=document.execCommand("copy"); }catch(e){} ta.remove(); msg.textContent= ok ? "Frasi copiate. Ora incollale nell'azione Testo di Comandi." : "Non riesco a copiare: tieni premuto sulle frasi per selezionarle e copiarle."; };
+    try{ navigator.clipboard.writeText(text).then(()=>{ msg.textContent="Frasi copiate. Ora incollale nell'azione Testo di Comandi."; }, fallback); }catch(e){ fallback(); }
+  }));
   const bk=document.createElement("div"); bk.className="panel"; bk.id="backup";
   bk.innerHTML=`<h2>Dati e backup</h2>
     <p>I carichi che salvi restano su questo telefono, dentro l'app. Se cancelli l'app dalla schermata Home o i dati del sito, si perdono: esporta un backup ogni tanto e conservalo in File o iCloud Drive.</p>
