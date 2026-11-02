@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161c23" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Palestra">
+<title>Palestra A·B·C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: sticky tab bar (A/B/C/Guida, colored like bumper plates), one column of exercise cards: figure | prescription, log grid below, sticky save bar. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --sunk:#e5eaef; --ink:#141a22; --muted:#56616e; --line:#d3d9e0;
+  --a:#1d5bb8; --b:#c99700; --c:#1e824a; --red:#c3362b;
+  --on-a:#ffffff; --on-b:#1b1500; --on-c:#ffffff;
+  --fig:#1a2330; --fig-far:#a3aebb; --eq:#c3ccd6; --plate:#26303c; --hub:#e5eaef; --cable:#7c8895;
+  --focus:#1d5bb8;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1217; --surface:#161c23; --sunk:#1c232c; --ink:#e6ebf1; --muted:#9aa5b2; --line:#29313b;
+  --a:#5a92e6; --b:#e2b93a; --c:#3db374; --red:#e2645a;
+  --on-a:#08121f; --on-b:#1b1500; --on-c:#04170c;
+  --fig:#e6ebf1; --fig-far:#5a6674; --eq:#36404c; --plate:#c4cdd7; --hub:#1c232c; --cable:#7d8996;
+  --focus:#5a92e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1217; --surface:#161c23; --sunk:#1c232c; --ink:#e6ebf1; --muted:#9aa5b2; --line:#29313b;
+  --a:#5a92e6; --b:#e2b93a; --c:#3db374; --red:#e2645a;
+  --on-a:#08121f; --on-b:#1b1500; --on-c:#04170c;
+  --fig:#e6ebf1; --fig-far:#5a6674; --eq:#36404c; --plate:#c4cdd7; --hub:#1c232c; --cable:#7d8996;
+  --focus:#5a92e6; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,svg{max-width:100%}
+button,input{font:inherit}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.05}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* Header + tabs */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;margin-right:auto;white-space:nowrap}
+.brand small{font-weight:500;color:var(--muted);font-size:.95rem;margin-left:6px}
+nav.tabs{display:flex;gap:6px}
+nav.tabs a{display:flex;align-items:center;gap:6px;text-decoration:none;font-family:var(--display);font-weight:600;font-size:1.05rem;padding:6px 12px 6px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+nav.tabs a .disc{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;background:var(--sunk);color:var(--muted)}
+nav.tabs a[data-day="a"] .disc{background:var(--a);color:var(--on-a)}
+nav.tabs a[data-day="b"] .disc{background:var(--b);color:var(--on-b)}
+nav.tabs a[data-day="c"] .disc{background:var(--c);color:var(--on-c)}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--ink)}
+
+main{padding-block:20px 40px}
+.view[data-day="a"]{--day:var(--a);--on-day:var(--on-a)}
+.view[data-day="b"]{--day:var(--b);--on-day:var(--on-b)}
+.view[data-day="c"]{--day:var(--c);--on-day:var(--on-c)}
+
+.dayhead{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;margin-bottom:16px}
+.plate-big{grid-row:span 2;width:56px;height:56px;border-radius:50%;background:var(--day);color:var(--on-day);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.9rem;box-shadow:inset 0 0 0 5px color-mix(in srgb,var(--on-day) 18%,transparent)}
+.dayhead h2{font-size:1.9rem}
+.dayhead p{margin:0;color:var(--muted)}
+
+details.block{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:16px}
+details.block>summary{cursor:pointer;padding:12px 14px;font-family:var(--display);font-weight:600;font-size:1.15rem;list-style:none;display:flex;align-items:center;gap:8px}
+details.block>summary::-webkit-details-marker{display:none}
+details.block>summary::after{content:"+";margin-left:auto;font-size:1.3rem;color:var(--muted)}
+details.block[open]>summary::after{content:"–"}
+details.block .inner{padding:0 14px 14px}
+.warm{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.warm li{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.warm .w-name{font-weight:600}
+.warm .w-dose{color:var(--muted)}
+.warm .vid{margin-left:auto}
+
+/* Exercise cards */
+.list{display:grid;gap:14px}
+.superset{border-left:3px solid var(--day);padding-left:10px;display:grid;gap:10px}
+.superset>.ss-label{font-family:var(--display);font-weight:600;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:132px 1fr;gap:12px}
+.fig{background:var(--sunk);border-radius:8px;aspect-ratio:6/5;max-width:100%;display:block;width:100%;height:auto}
+.info{min-width:0;display:grid;gap:6px;align-content:start}
+.ex-head{display:flex;gap:8px;align-items:baseline}
+.num{font-family:var(--display);font-weight:700;font-size:1rem;background:var(--day);color:var(--on-day);border-radius:6px;padding:1px 7px;flex:none}
+.ex-head h3{font-size:1.3rem;font-weight:600}
+.rx{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--display);font-weight:600;font-size:1rem;padding:1px 8px;border-radius:6px;background:var(--sunk);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip .k{color:var(--muted);font-weight:500;margin-right:4px}
+.note{margin:0;color:var(--muted);font-size:.95rem}
+.vid{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.92rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 6px;justify-self:start}
+.vid::before{content:"";width:16px;height:16px;border-radius:50%;background:var(--red) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 4.5v7l5.5-3.5z' fill='white'/%3E%3C/svg%3E") center/16px no-repeat}
+.vid:hover{border-color:var(--ink)}
+
+.alts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.alts .al{font-size:.85rem;color:var(--muted);margin-right:2px}
+.alt{font:inherit;font-size:.88rem;line-height:1.3;padding:4px 11px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.alt:hover{border-color:var(--muted)}
+.alt[aria-pressed="true"]{border-style:solid;border-color:var(--day);background:color-mix(in srgb,var(--day) 16%,transparent);font-weight:700}
+.log{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:8px}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:6px 14px}
+.set{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.set .sl{font-family:var(--display);font-weight:600;color:var(--muted);width:24px;flex:none}
+.set label{display:flex;align-items:center;gap:4px;font-size:.85rem;color:var(--muted)}
+.set input{width:58px;font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 6px;text-align:right;font-variant-numeric:tabular-nums}
+.set input::placeholder{color:var(--fig-far)}
+.set input:focus{border-color:var(--day);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--day) 35%,transparent)}
+.last{font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.last b{color:var(--ink);font-weight:600}
+
+/* Save bar */
+.savebar{position:sticky;bottom:0;z-index:4;margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px 12px 0 0;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:0 -6px 18px -12px rgba(0,0,0,.35)}
+.savebar input[type=date]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.btn{font:inherit;font-weight:700;border-radius:8px;padding:8px 14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--day);color:var(--on-day);border-color:var(--day);margin-left:auto}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.small{padding:4px 10px;font-size:.9rem}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.status{flex-basis:100%;font-size:.88rem;color:var(--muted);min-height:1.2em}
+
+.hist{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.hist li{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.hist .hd{font-weight:600;min-width:6.5em}
+.hist .hs{color:var(--muted);font-size:.92rem;flex:1;min-width:0}
+.empty{color:var(--muted);margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Guide */
+.guide{display:grid;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h2{font-size:1.5rem;margin-bottom:10px}
+.panel p{margin:0 0 10px;max-width:65ch}
+.panel p:last-child{margin-bottom:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-weight:600;font-size:1rem;color:var(--muted);letter-spacing:.02em}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:6px}
+.rules{margin:0;padding-left:1.1em;display:grid;gap:8px;max-width:65ch}
+
+@media (max-width:460px){
+  .card{grid-template-columns:104px 1fr;gap:10px;padding:10px}
+  .ex-head h3{font-size:1.18rem}
+  .brand small{display:none}
+  nav.tabs a{padding:5px 10px 5px 6px;font-size:1rem}
+}
+@media (max-width:360px){ nav.tabs a .lbl{display:none} nav.tabs a{padding:5px} }
+
+/* Figure strokes */
+.fig .near,.fig .far,.fig .torso{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.fig .near{stroke:var(--fig);stroke-width:3.6}
+.fig .far{stroke:var(--fig-far);stroke-width:3.6}
+.fig .torso{stroke:var(--fig);stroke-width:5.4}
+.fig .head{fill:var(--fig)}
+.fig .eq{fill:var(--eq)}
+.fig .eql{stroke:var(--eq);stroke-linecap:round;fill:none}
+.fig .floor{stroke:var(--eq);stroke-width:1.2}
+.fig .plate{fill:var(--plate)}
+.fig .hub{fill:var(--hub)}
+.fig .cable{stroke:var(--cable);stroke-width:.9}
+.fig .ghost{opacity:.28}
+.bk{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.bk .btn{margin:0}
+#bk-msg{margin-top:10px;color:var(--muted);font-size:.92rem}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Scheda A·B·C <small>full body · 3×/sett.</small></div>
+    <nav class="tabs" aria-label="Sedute">
+      <a href="#a" data-day="a"><span class="disc">A</span><span class="lbl">Squat</span></a>
+      <a href="#b" data-day="b"><span class="disc">B</span><span class="lbl">Stacco</span></a>
+      <a href="#c" data-day="c"><span class="disc">C</span><span class="lbl">Gamba sola</span></a>
+      <a href="#guida" data-day="guida"><span class="disc">?</span><span class="lbl">Guida</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Figure engine: stick figures posed by segment angles (0° = right, 90° = down) ---------- */
+const R = Math.PI/180;
+const vec = (l,a)=>[l*Math.cos(a*R), l*Math.sin(a*R)];
+const add = (p,q)=>[p[0]+q[0], p[1]+q[1]];
+const LEN = {torso:26, head:8.5, thigh:20, shin:19, foot:6, upper:13, fore:12};
+
+function solve(p){
+  const J = {};
+  J.P = [0,0];
+  J.N = vec(LEN.torso, p.t);
+  J.H = add(J.N, vec(LEN.head, p.h ?? p.t));
+  const off = p.off || [-2.5,0];
+  const leg = l=>{ const K=vec(LEN.thigh,l[0]); const A=add(K,vec(LEN.shin,l[1])); const T=add(A,vec(LEN.foot,l[2]||0)); return [K,A,T]; };
+  [J.K1,J.A1,J.T1] = leg(p.l1);
+  if(p.l2){ [J.K2,J.A2,J.T2] = leg(p.l2); J.P2 = J.P; }
+  else { J.P2=add(J.P,off); J.K2=add(J.K1,off); J.A2=add(J.A1,off); J.T2=add(J.T1,off); }
+  const arm = a=>{ let ua=a[0], fa=a[1]; if(p.rel){ ua+=p.t; fa+=p.t; } const E=add(J.N,vec(LEN.upper,ua)); return [E, add(E,vec(LEN.fore,fa))]; };
+  [J.E1,J.W1] = arm(p.a1);
+  if(p.a2){ [J.E2,J.W2] = arm(p.a2); J.N2 = J.N; }
+  else { J.N2=add(J.N,off); J.E2=add(J.E1,off); J.W2=add(J.W1,off); }
+  const anc = J[p.anchor||"P"], at = p.at || [60,52];
+  const dx = at[0]-anc[0], dy = at[1]-anc[1];
+  for(const k in J) J[k] = [J[k][0]+dx, J[k][1]+dy];
+  return J;
+}
+function lerp(a,b,u){
+  if(typeof a==="number" && typeof b==="number") return a+(b-a)*u;
+  if(Array.isArray(a) && Array.isArray(b)) return a.map((x,i)=>lerp(x,b[i],u));
+  if(a && typeof a==="object" && b && typeof b==="object"){ const o={}; for(const k of new Set([...Object.keys(a),...Object.keys(b)])) o[k]= (k in a && k in b) ? lerp(a[k],b[k],u) : (k in a ? a[k] : b[k]); return o; }
+  return a;
+}
+const NS="http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+const pts = arr => arr.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+
+function buildPose(g, def){
+  const back = el("g",{},g), body = el("g",{},g), front = el("g",{},g);
+  const far1 = el("polyline",{class:"far"},body), far2 = el("polyline",{class:"far"},body);
+  const torso = el("line",{class:"torso"},body), head = el("circle",{class:"head",r:5.4},body);
+  const near1 = el("polyline",{class:"near"},body), near2 = el("polyline",{class:"near"},body);
+  const dyn = [];
+  for(const pr of def.props||[]){
+    if(pr.k==="rect"||pr.k==="line") continue;
+    const layer = pr.back ? back : front;
+    if(pr.k==="plate"||pr.k==="wheel"){ const c=el("circle",{class:"plate",r:pr.r||8},layer); const h=el("circle",{class:"hub",r:pr.k==="wheel"?1.4:1.8},layer); dyn.push(J=>{const p=add(J[pr.j],[pr.dx||0,pr.dy||0]); for(const e of [c,h]){e.setAttribute("cx",p[0].toFixed(1)); e.setAttribute("cy",p[1].toFixed(1));}}); }
+    else if(pr.k==="db"){ const c=el("rect",{class:"plate",width:7,height:5,rx:1.6},layer); dyn.push(J=>{const p=add(J[pr.j],[pr.dx||0,pr.dy||0]); c.setAttribute("x",(p[0]-3.5).toFixed(1)); c.setAttribute("y",(p[1]-2.5).toFixed(1));}); }
+    else if(pr.k==="pad"){ const c=el("circle",{class:"plate",r:pr.r||3},layer); dyn.push(J=>{const p=add(J[pr.j],[pr.dx||0,pr.dy||0]); c.setAttribute("cx",p[0].toFixed(1)); c.setAttribute("cy",p[1].toFixed(1));}); }
+    else if(pr.k==="box"){ const c=el("rect",{class:"plate",width:pr.w,height:pr.h,rx:1.2},layer); dyn.push(J=>{const p=add(J[pr.j],[pr.dx||0,pr.dy||0]); c.setAttribute("x",(p[0]-pr.w/2).toFixed(1)); c.setAttribute("y",(p[1]-pr.h/2).toFixed(1));}); }
+    else if(pr.k==="jline"){ const l=el("line",{class:"eql","stroke-width":pr.sw||3},layer); dyn.push(J=>{ const a=J[pr.a], b=J[pr.b]; const dx=b[0]-a[0], dy=b[1]-a[1]; const L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, e=pr.ext||0, o=pr.off||[0,0]; l.setAttribute("x1",(a[0]-ux*e+o[0]).toFixed(1)); l.setAttribute("y1",(a[1]-uy*e+o[1]).toFixed(1)); l.setAttribute("x2",(b[0]+ux*e+o[0]).toFixed(1)); l.setAttribute("y2",(b[1]+uy*e+o[1]).toFixed(1)); }); }
+    else if(pr.k==="cable"){ const l=el("line",{class:"cable",x1:pr.from[0],y1:pr.from[1]},back); el("circle",{class:"plate",cx:pr.from[0],cy:pr.from[1],r:2},back); dyn.push(J=>{const p=J[pr.j]; l.setAttribute("x2",p[0].toFixed(1)); l.setAttribute("y2",p[1].toFixed(1));}); }
+  }
+  return function(pose){
+    const J = solve(pose);
+    far1.setAttribute("points", pts([J.P2,J.K2,J.A2,J.T2]));
+    far2.setAttribute("points", pts([J.N2,J.E2,J.W2]));
+    torso.setAttribute("x1",J.P[0].toFixed(1)); torso.setAttribute("y1",J.P[1].toFixed(1));
+    torso.setAttribute("x2",J.N[0].toFixed(1)); torso.setAttribute("y2",J.N[1].toFixed(1));
+    head.setAttribute("cx",J.H[0].toFixed(1)); head.setAttribute("cy",J.H[1].toFixed(1));
+    near1.setAttribute("points", pts([J.P,J.K1,J.A1,J.T1]));
+    near2.setAttribute("points", pts([J.N,J.E1,J.W1]));
+    for(const f of dyn) f(J);
+  };
+}
+
+const reduced = (()=>{ try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } })();
+const figures = [];
+function makeFigure(def, label){
+  const svg = el("svg",{class:"fig",viewBox:def.vb||"0 0 120 100",role:"img","aria-label":label});
+  for(const pr of def.props||[]){
+    if(pr.k==="rect") el("rect",{class:"eq",x:pr.x,y:pr.y,width:pr.w,height:pr.h,rx:pr.rx??1},svg);
+    if(pr.k==="line") el("line",{class:"eql",x1:pr.x1,y1:pr.y1,x2:pr.x2,y2:pr.y2,"stroke-width":pr.sw||3},svg);
+  }
+  if(def.floor!==false) el("line",{class:"floor",x1:0,y1:92,x2:120,y2:92},svg);
+  const p0 = Object.assign({}, def.base, def.from), p1 = Object.assign({}, def.base, def.to);
+  if(reduced){
+    const g0 = el("g",{class:"ghost"},svg); buildPose(g0,def)(p0);
+    const g1 = el("g",{},svg); buildPose(g1,def)(p1);
+    return svg;
+  }
+  const set = buildPose(el("g",{},svg), def);
+  set(p0);
+  figures.push({svg, set, p0, p1, visible:false, period: def.period||3000, phase: Math.random()*0.15});
+  return svg;
+}
+let raf = 0;
+function tick(now){
+  raf = 0; let any=false;
+  for(const f of figures){
+    if(!f.visible) continue; any=true;
+    const ph = ((now/f.period)+f.phase)%1;
+    // hold briefly at each end, smooth in between
+    const s = Math.min(1, Math.max(0, (ph<0.5 ? ph : 1-ph)*2.4 - 0.1));
+    const u = 0.5-0.5*Math.cos(Math.PI*s);
+    f.set(lerp(f.p0,f.p1,u));
+  }
+  if(any) raf = requestAnimationFrame(tick);
+}
+const io = ("IntersectionObserver" in window) ? new IntersectionObserver(entries=>{
+  for(const e of entries){ const f=figures.find(x=>x.svg===e.target); if(f) f.visible=e.isIntersecting; }
+  if(!raf) raf=requestAnimationFrame(tick);
+},{rootMargin:"80px"}) : null;
+
+/* ---------- Common poses ---------- */
+const STAND = {anchor:"A1", at:[60,90], t:-90, l1:[90,90,0], a1:[90,90]};
+const yt = q => "https://www.youtube.com/results?search_query="+encodeURIComponent(q);
+
+/* ---------- Program ---------- */
+const WARM = [
+  ["Mobilità caviglia, ginocchio al muro","10 per lato","knee to wall ankle mobility drill"],
+  ["Hip 90/90","6 rotazioni per lato","hip 90 90 mobility drill"],
+  ["Ponte glutei","12, tieni 2\" in alto","ponte glutei esercizio corretto"],
+  ["Passi laterali con mini band","2 × 10 passi per lato","lateral band walk mini band"],
+  ["Bird dog","6 per lato, lento","bird dog esercizio core"],
+  ["Serie di avvicinamento","2–3 serie leggere sul primo esercizio",null]
+];
+
+// unit: kg = [kg, rip]; bw = [+kg, rip]; s = [sec]; m = [kg, m]
+const DAYS = {
+ a:{ name:"Seduta A", focus:"Squat, spinta orizzontale, quadricipite e ginocchio", ex:[
+  {id:"squat",n:"1",name:"Back squat",sets:4,reps:"6–8",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"40 kg",
+   note:"Scendi controllato in 3\". Le ginocchia seguono la direzione delle punte e possono superarle.",q:"back squat bilanciere tecnica corretta",
+   fig:{base:{anchor:"A1",at:[62,90]},from:{t:-90,l1:[90,90,0],a1:[135,-63]},to:{t:-55,l1:[10,115,0],a1:[165,-30]},props:[{k:"plate",j:"N",dx:-3,dy:2,r:8.5,back:true}]}},
+  {id:"panca",n:"2",name:"Panca piana con manubri",sets:3,reps:"8–10",rest:"2'",rir:"RIR 2",unit:"kg",start:"14 kg per mano",
+   note:"Scapole addotte, piedi ben piantati, gomiti a circa 45° dal busto.",q:"panca piana manubri esecuzione corretta",
+   fig:{base:{anchor:"P",at:[70,62],t:180,h:180,l1:[30,95,0],off:[-2,-1]},from:{a1:[170,-60]},to:{a1:[280,-90]},
+        props:[{k:"rect",x:28,y:65,w:54,h:4},{k:"rect",x:34,y:69,w:4,h:23},{k:"rect",x:72,y:69,w:4,h:23},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
+  {id:"bulgaro",n:"3a",name:"Split squat bulgaro",sets:3,reps:"8 per gamba",rest:"–",unit:"kg",start:"8 kg per mano",
+   note:"Busto leggermente inclinato in avanti. Il ginocchio anteriore non deve cedere verso l'interno.",q:"squat bulgaro manubri tecnica",
+   fig:{base:{anchor:"A1",at:[72,90],a1:[90,90]},from:{t:-80,l1:[75,95,0],l2:[120,170,180]},to:{t:-75,l1:[15,110,0],l2:[100,221,180]},
+        props:[{k:"rect",x:22,y:75,w:24,h:5},{k:"rect",x:25,y:80,w:3,h:12},{k:"rect",x:40,y:80,w:3,h:12},{k:"db",j:"W1"}]}},
+  {id:"rematore",n:"3b",name:"Rematore con manubrio",sets:3,reps:"10 per lato",rest:"90\"",unit:"kg",start:"18 kg",
+   note:"Mano e ginocchio sulla panca. Tira portando il gomito verso l'anca, schiena piatta.",q:"rematore manubrio un braccio panca tecnica",
+   fig:{base:{anchor:"P",at:[45,54],t:-10,l1:[100,95,0],l2:[90,180,180],a2:[90,90]},from:{a1:[90,90]},to:{a1:[225,90]},
+        props:[{k:"rect",x:22,y:74.5,w:66,h:4.5},{k:"rect",x:26,y:79,w:3,h:13},{k:"rect",x:82,y:79,w:3,h:13},{k:"db",j:"W1"}]}},
+  {id:"legext",n:"4",name:"Leg extension",sets:3,reps:"12–15",rest:"75\"",unit:"kg",start:"25 kg",
+   note:"Tieni 1\" in estensione completa e scendi in 3\". Lavora il vasto mediale, che stabilizza la rotula.",q:"leg extension esecuzione corretta",
+   fig:{base:{anchor:"P",at:[52,60],t:-95,a1:[100,20]},from:{l1:[0,90,0]},to:{l1:[0,5,-85]},
+        props:[{k:"rect",x:30,y:62,w:44,h:5},{k:"rect",x:38,y:28,w:5,h:34},{k:"rect",x:50,y:67,w:4,h:25},{k:"pad",j:"A1",r:3.2,dx:1,dy:1}]}},
+  {id:"copenhagen",n:"5",name:"Copenhagen plank (versione corta)",sets:3,reps:"20–30\" per lato",rest:"45\"",unit:"s",start:"20\"",
+   note:"Ginocchio della gamba sopra appoggiato sulla panca. Rinforza gli adduttori: ottima prevenzione per ginocchio e pube.",q:"copenhagen plank short lever",
+   fig:{base:{anchor:"E2",at:[24,89],a1:[-15,-15],a2:[90,0]},from:{t:165,l1:[-12,-5,0],l2:[-2,0,0]},to:{t:175,l1:[-20,-3,0],l2:[45,10,0]},
+        props:[{k:"rect",x:60,y:67,w:44,h:5},{k:"rect",x:63,y:72,w:3,h:20},{k:"rect",x:98,y:72,w:3,h:20}]}},
+  {id:"deadbug",n:"6a",name:"Dead bug",sets:3,reps:"8 per lato",rest:"–",unit:"bw",start:"corpo libero",
+   note:"Zona lombare schiacciata a terra. Espira mentre allunghi braccio e gamba opposti.",q:"dead bug esercizio core corretto",
+   fig:{base:{anchor:"P",at:[70,86],t:180,h:180,l2:[-90,0,-90],a2:[-90,-90],off:[-2,-1]},from:{l1:[-90,0,-90],a1:[-90,-90]},to:{l1:[-10,-5,-80],a1:[-170,-170]}}},
+  {id:"pallof",n:"6b",name:"Pallof press al cavo",sets:3,reps:"10 per lato",rest:"60\"",unit:"kg",start:"10 kg",
+   note:"Di fianco al cavo. Spingi le mani avanti e tieni 2\" a braccia tese senza far ruotare il busto.",q:"pallof press cavo esecuzione",
+   fig:{base:{anchor:"A1",at:[62,90],t:-88,l1:[80,98,0]},from:{a1:[100,-30]},to:{a1:[8,5]},
+        props:[{k:"rect",x:10,y:10,w:6,h:82},{k:"cable",from:[16,46],j:"W1"}]}}
+ ]},
+ b:{ name:"Seduta B", focus:"Stacco, tirata verticale, catena posteriore", ex:[
+  {id:"rdl",n:"1",name:"Stacco rumeno con bilanciere",sets:4,reps:"8",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"40 kg",
+   note:"Bacino indietro, schiena neutra, bilanciere vicino alle gambe. Scendi fino a metà tibia.",q:"stacco rumeno bilanciere tecnica corretta",
+   fig:{base:{anchor:"A1",at:[55,90],a1:[90,90]},from:{t:-90,l1:[90,90,0]},to:{t:-15,l1:[70,100,0]},props:[{k:"plate",j:"W1",r:8.5}]}},
+  {id:"trazioni",n:"2",name:"Trazioni (o lat machine)",sets:4,reps:"6–10",rest:"2'",unit:"bw",start:"corpo libero · lat 40 kg",
+   note:"Petto verso la sbarra. Se arrivi a 10 pulite, aggiungi zavorra. Alla lat machine scrivi il carico nel campo kg.",q:"trazioni alla sbarra tecnica corretta",
+   fig:{vb:"0 -2 120 108",floor:false,base:{anchor:"W1",at:[62,14],t:-90,l1:[100,120,30]},from:{a1:[-80,-90]},to:{a1:[45,-90]},
+        props:[{k:"line",x1:28,y1:14,x2:96,y2:14,sw:2.4}]}},
+  {id:"stepdown",n:"3a",name:"Step-down eccentrico",sets:3,reps:"8 per gamba",rest:"–",unit:"bw",start:"corpo libero",
+   note:"Step da 20–30 cm. Scendi in 4\" e sfiora appena il tallone a terra. È l'esercizio chiave per il ginocchio.",q:"eccentric step down knee exercise",
+   fig:{vb:"0 -4 120 100",base:{anchor:"A1",at:[55,79]},from:{t:-90,l1:[90,90,0],l2:[75,80,0],a1:[60,80]},to:{t:-65,l1:[20,120,0],l2:[50,66,0],a1:[10,0]},
+        props:[{k:"rect",x:36,y:81,w:30,h:11,rx:1.5}]}},
+  {id:"lento",n:"3b",name:"Lento avanti con manubri in piedi",sets:3,reps:"8–10",rest:"90\"",unit:"kg",start:"10 kg per mano",
+   note:"Glutei e addome contratti, non inarcare la schiena.",q:"lento avanti manubri in piedi tecnica",
+   fig:{vb:"0 -8 120 100",base:STAND,from:{a1:[100,-80]},to:{a1:[-90,-90]},props:[{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
+  {id:"legcurl",n:"4",name:"Leg curl (sdraiato o seduto)",sets:3,reps:"10–12",rest:"90\"",unit:"kg",start:"25 kg",
+   note:"Sostituisce il Nordic. Sali in 1\", scendi lentamente in 3\": è la fase che protegge ginocchio e crociato.",q:"leg curl sdraiato esecuzione corretta",
+   fig:{base:{anchor:"P",at:[55,65],t:180,h:178,a1:[100,60],off:[-1.5,-1.5]},from:{l1:[0,0,90]},to:{l1:[0,-95,180]},
+        props:[{k:"rect",x:20,y:69,w:62,h:5},{k:"rect",x:30,y:74,w:4,h:18},{k:"rect",x:70,y:74,w:4,h:18},{k:"pad",j:"A1",r:3,dx:1.5,dy:-2}]}},
+  {id:"hipthrust",n:"5",name:"Hip thrust",sets:3,reps:"10",rest:"90\"",unit:"kg",start:"40 kg",
+   note:"Schiena alta sulla panca. Tieni 1\" in alto, mento verso il petto, tibie verticali.",q:"hip thrust bilanciere tecnica",
+   fig:{base:{anchor:"A1",at:[75,90]},from:{t:-158,l1:[-40,80,0],a1:[22,22]},to:{t:-180,l1:[0,90,0],a1:[0,0]},
+        props:[{k:"rect",x:22,y:75,w:16,h:17},{k:"plate",j:"P",r:7,dy:-6}]},
+   short:"Hip thrust", alts:[
+    {id:"glutebridge",short:"Glute bridge",name:"Glute bridge con bilanciere",sets:3,reps:"12",rest:"90\"",rir:"",unit:"kg",start:"40 kg",
+     note:"A terra, senza panca: più veloce da preparare. Lavora gli stessi glutei con un'escursione un po' più corta. Tieni 1\" in alto.",q:"glute bridge con bilanciere tecnica",
+     fig:{base:{anchor:"A1",at:[75,90],h:180},from:{t:180,l1:[-45,60,0],a1:[0,0]},to:{t:154,l1:[-14,95,0],a1:[-20,-20]},props:[{k:"plate",j:"P",r:7,dy:-6}]}},
+    {id:"pullthrough",short:"Pull-through",name:"Pull-through al cavo",sets:3,reps:"12",rest:"90\"",rir:"",unit:"kg",start:"15 kg",
+     note:"Di spalle al cavo basso, corda tra le gambe. Porta il bacino indietro, poi spingi le anche avanti e stringi i glutei. Insegna bene il movimento d'anca.",q:"cable pull through tecnica",
+     fig:{base:{anchor:"A1",at:[66,90]},from:{t:-90,l1:[90,90,0],a1:[100,70]},to:{t:-30,l1:[75,100,0],a1:[140,140]},props:[{k:"rect",x:6,y:20,w:6,h:72},{k:"cable",from:[12,86],j:"W1"}]}},
+    {id:"hipthrust1",short:"Su una gamba",name:"Hip thrust su una gamba",sets:3,reps:"10 per gamba",rest:"75\"",rir:"",unit:"bw",start:"corpo libero",
+     note:"Schiena alta sulla panca, una gamba sola. Ottimo per la stabilità di bacino e ginocchio. Quando diventa facile, appoggia un manubrio sull'anca.",q:"single leg hip thrust tecnica",
+     fig:{base:{anchor:"A1",at:[75,90],l2:[-75,30,-60]},from:{t:-158,l1:[-40,80,0],a1:[22,22]},to:{t:-180,l1:[0,90,0],a1:[0,0]},props:[{k:"rect",x:22,y:75,w:16,h:17}]}}
+   ]},
+  {id:"iper",n:"6a",name:"Iperestensioni a 45°",sets:3,reps:"12",rest:"–",unit:"bw",start:"corpo libero",
+   note:"Il movimento parte dalle anche, non dalla schiena. Più avanti tieni un disco al petto.",q:"iperestensioni 45 gradi esecuzione",
+   fig:{base:{anchor:"A1",at:[30,85],rel:true,l1:[135,135,45],a1:[145,0]},from:{t:80},to:{t:-45},
+        props:[{k:"line",x1:47,y1:76,x2:62,y2:61,sw:5},{k:"line",x1:44,y1:78,x2:40,y2:92,sw:2.5},{k:"line",x1:40,y1:92,x2:24,y2:88,sw:2.5},{k:"pad",j:"A1",r:2.6,dx:3,dy:3,back:true}]}},
+  {id:"sideplank",n:"6b",name:"Side plank",sets:3,reps:"30–40\" per lato",rest:"60\"",unit:"s",start:"30\"",
+   note:"Corpo in linea, anca alta, gomito sotto la spalla.",q:"side plank plank laterale esecuzione",
+   fig:{base:{anchor:"A1",at:[95,89],a1:[-90,-90],a2:[90,0],off:[0,-2]},from:{t:200,l1:[5,5,0]},to:{t:191,l1:[11,11,0]}}}
+ ]},
+ c:{ name:"Seduta C", focus:"Lavoro su una gamba, stabilità, tirata orizzontale", ex:[
+  {id:"stacco",n:"1",name:"Stacco da terra con bilanciere",sets:4,reps:"5–6",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"50 kg",
+   note:"Sostituisce la trap bar. Bilanciere sopra il centro del piede, schiena neutra, spingi il pavimento con le gambe.",q:"stacco da terra bilanciere tecnica corretta",
+   fig:{base:{anchor:"A1",at:[58,90],a1:[90,90]},from:{t:-90,l1:[90,90,0]},to:{t:-35,l1:[25,118,0]},props:[{k:"plate",j:"W1",r:9,dy:3}]},
+   short:"Stacco da terra", alts:[
+    {id:"sumo",short:"Stacco sumo",name:"Stacco sumo con bilanciere",sets:4,reps:"5–6",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"50 kg",
+     note:"Piedi larghi, punte aperte, ginocchia spinte in fuori. Busto più verticale: meno carico sulla zona lombare, più lavoro per adduttori e quadricipiti.",q:"stacco sumo tecnica corretta",
+     fig:{base:{anchor:"A1",at:[60,90],a1:[90,90],off:[-4,0]},from:{t:-90,l1:[90,90,0]},to:{t:-50,l1:[20,105,0]},props:[{k:"plate",j:"W1",r:9,dy:3}]}},
+    {id:"goblet",short:"Goblet squat",name:"Goblet squat pesante",sets:4,reps:"8",rest:"2'",rir:"RIR 2",unit:"kg",start:"20 kg",
+     note:"Manubrio o kettlebell tenuto al petto. Busto dritto e discesa profonda, senza carico sulla schiena. La scelta più semplice se vuoi risparmiare la zona lombare.",q:"goblet squat tecnica corretta",
+     fig:{base:{anchor:"A1",at:[62,90]},from:{t:-90,l1:[90,90,0],a1:[80,-60]},to:{t:-70,l1:[5,120,0],a1:[100,-40]},props:[{k:"box",j:"W1",w:6,h:7,dx:1}]}},
+    {id:"legpress",short:"Leg press",name:"Leg press 45°",sets:4,reps:"8–10",rest:"2'",rir:"RIR 2",unit:"kg",start:"80 kg (carico aggiunto)",
+     note:"Piedi a larghezza spalle al centro della pedana. Scendi finché il bacino resta attaccato allo schienale, senza bloccare le ginocchia in alto.",q:"leg press 45 gradi esecuzione corretta",
+     fig:{base:{anchor:"P",at:[40,72],t:-150,a1:[60,0]},from:{l1:[-35,-35,-125]},to:{l1:[-83,17,-125]},
+          props:[{k:"line",x1:38,y1:75,x2:16,y2:62,sw:4},{k:"line",x1:38,y1:76,x2:50,y2:76,sw:4},{k:"rect",x:32,y:78,w:6,h:14},{k:"line",x1:60,y1:86,x2:106,y2:54,sw:2},{k:"jline",a:"A1",b:"T1",ext:5,sw:3,off:[1.6,-1.2]}]}}
+   ]},
+  {id:"affondo",n:"2",name:"Affondo indietro con manubri",sets:3,reps:"8 per gamba",rest:"90\"",unit:"kg",start:"10 kg per mano",
+   note:"Passo indietro, ginocchio posteriore vicino a terra. Più gentile sul ginocchio dell'affondo in avanti.",q:"affondi indietro manubri tecnica",
+   fig:{base:{anchor:"A1",at:[68,90],a1:[90,90]},from:{t:-90,l1:[90,90,0],l2:[90,90,0]},to:{t:-88,l1:[5,100,0],l2:[110,175,20]},props:[{k:"db",j:"W1"}]}},
+  {id:"inclinata",n:"3a",name:"Panca inclinata con manubri",sets:3,reps:"10",rest:"–",unit:"kg",start:"12 kg per mano",
+   note:"Panca a 30°. Scendi controllato fino all'altezza del petto.",q:"panca inclinata manubri tecnica",
+   fig:{base:{anchor:"P",at:[70,66],t:210,h:210,l1:[20,95,0],off:[-2,-1]},from:{a1:[120,-70]},to:{a1:[280,-85]},
+        props:[{k:"line",x1:69,y1:70,x2:45,y2:56,sw:4},{k:"line",x1:66,y1:70,x2:82,y2:70,sw:4},{k:"rect",x:58,y:72,w:4,h:20},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
+  {id:"pulley",n:"3b",name:"Pulley basso",sets:3,reps:"10–12",rest:"90\"",unit:"kg",start:"35 kg",
+   note:"Petto alto, tira verso l'ombelico senza dondolare col busto.",q:"pulley basso tecnica corretta",
+   fig:{base:{anchor:"P",at:[40,72],l1:[0,20,-80]},from:{t:-78,a1:[10,5]},to:{t:-95,a1:[150,0]},
+        props:[{k:"rect",x:18,y:74,w:40,h:5},{k:"rect",x:34,y:79,w:5,h:13},{k:"rect",x:80,y:64,w:4,h:28},{k:"rect",x:96,y:20,w:6,h:72},{k:"cable",from:[96,62],j:"W1"}]}},
+  {id:"rdl1",n:"4",name:"Stacco rumeno su una gamba",sets:3,reps:"8 per gamba",rest:"75\"",unit:"kg",start:"12 kg",
+   note:"Bacino parallelo al pavimento. Allena equilibrio e stabilità di caviglia, ginocchio e anca.",q:"stacco rumeno monopodalico manubrio",
+   fig:{base:{anchor:"A1",at:[60,90],a1:[90,90],a2:[80,90]},from:{t:-90,l1:[90,90,0],l2:[100,110,0]},to:{t:-5,l1:[85,95,0],l2:[175,178,90]},props:[{k:"db",j:"W1"}]}},
+  {id:"calf",n:"5a",name:"Calf raise in piedi",sets:3,reps:"12",rest:"–",unit:"kg",start:"16 kg",
+   note:"Avampiede su uno step: tieni 2\" in alto e scendi in 3\" sotto il livello dello step.",q:"calf raise in piedi su step",
+   fig:{vb:"0 -8 120 100",base:{anchor:"T1",at:[62,80],t:-90,a1:[90,90]},from:{l1:[90,90,-25]},to:{l1:[90,90,40]},props:[{k:"rect",x:58,y:80,w:34,h:12,rx:1.5},{k:"db",j:"W1"}]}},
+  {id:"calfsed",n:"5b",name:"Calf raise da seduto",sets:2,reps:"15",rest:"60\"",unit:"kg",start:"20 kg",
+   note:"Lavora il soleo, che aiuta molto ad assorbire i carichi sul ginocchio.",q:"seated calf raise soleus",
+   fig:{base:{anchor:"P",at:[45,64],t:-90,a1:[50,60]},from:{l1:[10,90,-25]},to:{l1:[-5,90,30]},
+        props:[{k:"rect",x:25,y:67,w:30,h:5},{k:"rect",x:38,y:72,w:4,h:20},{k:"rect",x:66,y:84,w:14,h:8},{k:"box",j:"K1",w:12,h:4,dy:-3.5}]}},
+  {id:"abwheel",n:"6a",name:"Ab wheel rollout in ginocchio",sets:3,reps:"6–10",rest:"–",unit:"bw",start:"corpo libero",
+   note:"Fermati prima che la schiena si inarchi, glutei contratti.",q:"ab wheel rollout in ginocchio tecnica",
+   fig:{base:{anchor:"K1",at:[40,88]},from:{t:-15,l1:[120,180,180],a1:[85,85]},to:{t:-2,l1:[160,180,180],a1:[20,15]},props:[{k:"wheel",j:"W1",r:4.5,dy:-1}]}},
+  {id:"suitcase",n:"6b",name:"Suitcase carry",sets:3,reps:"30 m per lato",rest:"60\"",unit:"m",start:"20 kg",
+   note:"Un manubrio pesante in una mano. Cammina con il busto dritto senza inclinarti verso il peso.",q:"suitcase carry esecuzione",
+   fig:{period:1600,base:{anchor:"P",at:[60,51],t:-90,a1:[82,94]},from:{l1:[75,95,0],l2:[105,100,0],a2:[70,60]},to:{l1:[105,100,0],l2:[75,95,0],a2:[110,120]},props:[{k:"db",j:"W1",dy:1}]},
+   short:"Suitcase carry", alts:[
+    {id:"farmer",short:"Farmer walk",name:"Farmer walk",sets:3,reps:"30 m",rest:"60\"",rir:"",unit:"m",start:"2 × 20 kg",
+     note:"Un manubrio per mano. Più facile da gestire del suitcase: allena presa, postura e core. Spalle basse, passi corti.",q:"farmer walk esecuzione corretta",
+     fig:{period:1600,base:{anchor:"P",at:[60,51],t:-90,a1:[82,94],a2:[100,88]},from:{l1:[75,95,0],l2:[105,100,0]},to:{l1:[105,100,0],l2:[75,95,0]},props:[{k:"db",j:"W1",dy:1},{k:"db",j:"W2",dy:1,back:true}]}},
+    {id:"suitcasehold",short:"Hold sul posto",name:"Suitcase hold sul posto",sets:3,reps:"30–40\" per lato",rest:"60\"",rir:"",unit:"s",start:"20 kg",
+     note:"Lo stesso esercizio senza camminare, utile se in sala non hai spazio. Busto dritto e spalle alla stessa altezza.",q:"suitcase hold isometric core",
+     fig:{base:Object.assign({},STAND,{a1:[82,94]}),from:{a2:[80,88]},to:{a2:[84,92]},props:[{k:"db",j:"W1",dy:1}]}},
+    {id:"plankdrag",short:"Plank + manubrio",name:"Plank con trascinamento manubrio",sets:3,reps:"8 per lato",rest:"60\"",rir:"",unit:"kg",start:"8 kg",
+     note:"In plank sulle mani, piedi un po' larghi. Con una mano porta il manubrio dall'altro lato passando sotto il corpo. Il bacino non deve ruotare.",q:"plank pull through dumbbell",
+     fig:{base:{anchor:"A1",at:[95,87],t:198.8,l1:[18.8,18.8,115],a2:[90,90],off:[-3,0]},from:{a1:[75,110]},to:{a1:[105,75]},props:[{k:"db",j:"W1",dy:1}]}}
+   ]},
+  {id:"facepull",n:"7",name:"Face pull seduto (postazione pulley)",sets:2,reps:"15",rest:"45\"",unit:"kg",start:"10 kg",
+   note:"Resta alla postazione del pulley basso e monta la corda. Tira verso la fronte aprendo le mani ai lati delle orecchie, gomiti alti. Con il cavo basso usa un carico leggero e tieni il busto fermo.",q:"seated face pull cable row station",
+   fig:{base:{anchor:"P",at:[40,72],l1:[0,20,-80],t:-92},from:{a1:[15,0]},to:{a1:[-178,-35]},
+        props:[{k:"rect",x:18,y:74,w:40,h:5},{k:"rect",x:34,y:79,w:5,h:13},{k:"rect",x:80,y:64,w:4,h:28},{k:"rect",x:96,y:20,w:6,h:72},{k:"cable",from:[96,62],j:"W1"}]}}
+ ]}
+};
+
+const FIELDS = { kg:[["kg","kg","decimal"],["rip","rip","numeric"]], bw:[["+kg","+kg","decimal"],["rip","rip","numeric"]], s:[["sec","sec","numeric"]], m:[["kg","kg","decimal"],["m","m","numeric"]] };
+
+/* ---------- Storage ---------- */
+const LS_SESS="scheda-abc-sessions-v1", LS_DRAFT="scheda-abc-draft-v1-";
+function lsGet(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+let mode="loading", col=null, sessions=[], sessionsLoaded=false;
+const todayISO = (()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); })();
+const fmtDate = iso => { try{ return new Date(iso+"T12:00:00").toLocaleDateString("it-IT",{day:"numeric",month:"short",year: iso.slice(0,4)===todayISO.slice(0,4)?undefined:"numeric"}); }catch(e){ return iso; } };
+const fmtNum = x => String(x).replace(".",",");
+
+let syncNote="";
+let storeReady = null;
+const connect = async ()=>{
+  let db=null, user=null, uid=null;
+  try{ if(window.claude && typeof window.claude.use==="function"){ [db,user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } }catch(e){}
+  try{ uid = user ? await user.id() : null; }catch(e){ uid=null; }
+  if(db && uid){
+    try{
+      col = db.collection("data/users/"+uid);
+      mode="cloud";
+      const timer=setTimeout(()=>{ if(!sessionsLoaded){ syncNote="Lo storico non risponde ancora: i nuovi salvataggi verranno inviati appena possibile."; renderStatusAll(); } },10000);
+      col.onSnapshot(snap=>{
+        if(!snap.metadata.fromCache){ clearTimeout(timer); syncNote=""; }
+        sessions = snap.docs.filter(d=>d.id!=="prefs").map(d=>Object.assign({id:d.id}, d.data()));
+        const pd = snap.docs.find(d=>d.id==="prefs");
+        if(pd){ const remote=(pd.data()||{}).choice||{}; if(JSON.stringify(remote)!==JSON.stringify(prefs)){ prefs=Object.assign({},remote); lsSet(LS_PREFS,prefs); rerenderVariants(); } }
+        sessionsLoaded=true; onSessions();
+      }, err=>{ clearTimeout(timer); syncNote="Storico non disponibile al momento ("+(err&&err.code||"errore")+")."; renderStatusAll(); });
+    }catch(e){ mode="local"; }
+  } else mode="local";
+  if(mode==="local"){ sessions = lsGet(LS_SESS)||[]; sessionsLoaded=true; onSessions(); }
+  renderStatusAll();
+};
+
+async function saveSession(doc){
+  await storeReady;
+  if(mode==="cloud"){ await col.doc(doc.id).set({day:doc.day,date:doc.date,ex:doc.ex,savedAt:doc.savedAt}); }
+  else { sessions = sessions.filter(s=>s.id!==doc.id).concat([doc]); lsSet(LS_SESS,sessions); onSessions(); }
+}
+async function deleteSession(id){
+  await storeReady;
+  if(mode==="cloud"){ await col.doc(id).delete(); }
+  else { sessions = sessions.filter(s=>s.id!==id); lsSet(LS_SESS,sessions); onSessions(); }
+}
+
+/* ---------- Variants (alternatives) ---------- */
+const LS_PREFS="scheda-abc-prefs-v1";
+let prefs = lsGet(LS_PREFS)||{};
+function variantOf(e){
+  const alt = prefs[e.id] && e.alts ? e.alts.find(a=>a.id===prefs[e.id]) : null;
+  return alt ? Object.assign({}, e, alt, {base:e.id, n:e.n, alts:e.alts}) : Object.assign({}, e, {base:e.id});
+}
+const activeEx = day => DAYS[day].ex.map(variantOf);
+let prefsWriting=false;
+async function choose(day, e, optId){
+  if(optId===e.id) delete prefs[e.id]; else prefs[e.id]=optId;
+  lsSet(LS_PREFS,prefs);
+  rerenderCard(day,e); refreshLast(day); saveDraftSoon(day);
+  if(mode==="cloud" && col && !prefsWriting){
+    prefsWriting=true;
+    try{ await col.doc("prefs").set({choice:Object.assign({},prefs)}); }catch(err){}
+    finally{ prefsWriting=false; }
+  }
+}
+function rerenderCard(day,e){
+  const old = views[day] && views[day].querySelector(`[data-base="${e.id}"]`); if(!old) return;
+  for(let i=figures.length-1;i>=0;i--){ if(old.contains(figures[i].svg)){ if(io) io.unobserve(figures[i].svg); figures.splice(i,1); } }
+  const fresh = card(day,e); old.replaceWith(fresh);
+  fresh.querySelectorAll("svg.fig").forEach(svg=>{ const f=figures.find(x=>x.svg===svg); if(f){ if(io) io.observe(svg); else f.visible=true; } });
+  if(!raf) raf=requestAnimationFrame(tick);
+}
+function rerenderVariants(){
+  for(const day in views){ for(const e of DAYS[day].ex){ if(e.alts) rerenderCard(day,e); } refreshLast(day); }
+}
+
+/* ---------- Day state ---------- */
+const state = {}; // day -> {date, dirty, touched}
+function lastFor(exId, beforeDate){
+  let best=null;
+  for(const s of sessions){ if(!s.ex||!s.ex[exId]||!(s.date<beforeDate)) continue; if(!best||s.date>best.date) best=s; }
+  return best ? {date:best.date, sets:best.ex[exId]} : null;
+}
+function fmtSets(unit, sets){
+  return sets.map(s=>{
+    const a=s[0], b=s[1];
+    if(unit==="s") return a?a+"\"":"";
+    if(unit==="m") return (a?fmtNum(a)+" kg × ":"")+(b?b+" m":"");
+    if(unit==="bw") return (a? "+"+fmtNum(a)+" × ":"")+(b||"");
+    return (a?fmtNum(a):"–")+(b?" × "+b:"");
+  }).filter(Boolean).join(" · ");
+}
+
+/* ---------- Rendering ---------- */
+const main = document.getElementById("main");
+const views = {};
+
+function renderDay(key){
+  const D = DAYS[key];
+  const v = document.createElement("section");
+  v.className="view"; v.dataset.day=key; v.id="view-"+key; v.hidden=true;
+  v.innerHTML = `
+    <div class="dayhead"><div class="plate-big" aria-hidden="true">${key.toUpperCase()}</div><h2>${D.name}</h2><p>${D.focus} · circa 60'</p></div>
+    <details class="block"><summary>Riscaldamento · 8–10'</summary><div class="inner"><ul class="warm">${WARM.map(w=>`<li><span class="w-name">${w[0]}</span><span class="w-dose">${w[1]}</span>${w[2]?`<a class="vid" href="${yt(w[2])}" target="_blank" rel="noopener">Video</a>`:""}</li>`).join("")}</ul></div></details>
+    <div class="list"></div>
+    <details class="block hist-block" style="margin-top:16px"><summary>Storico ${D.name}</summary><div class="inner"><ul class="hist"></ul></div></details>
+    <div class="savebar">
+      <label for="date-${key}" class="sr">Data</label>
+      <input type="date" id="date-${key}" value="${todayISO}">
+      <button class="btn" type="button" data-act="clear">Svuota</button>
+      <button class="btn primary" type="button" data-act="save">Salva ${D.name.toLowerCase()}</button>
+      <div class="status" aria-live="polite"></div>
+    </div>`;
+  const list = v.querySelector(".list");
+  // group supersets
+  let i=0;
+  while(i<D.ex.length){
+    const e=D.ex[i]; const m=/^(\d+)([a-z])$/.exec(e.n);
+    if(m){
+      const grp=[]; while(i<D.ex.length && D.ex[i].n.startsWith(m[1]) && /[a-z]$/.test(D.ex[i].n)){ grp.push(D.ex[i]); i++; }
+      const ss=document.createElement("div"); ss.className="superset";
+      ss.innerHTML=`<div class="ss-label">Superset ${m[1]} · alterna gli esercizi, recupera dopo l'ultimo</div>`;
+      grp.forEach(g=>ss.appendChild(card(key,g)));
+      list.appendChild(ss);
+    } else { list.appendChild(card(key,e)); i++; }
+  }
+  state[key]={date:todayISO, touched:false};
+  v.querySelector("[data-act=save]").addEventListener("click",()=>doSave(key));
+  v.querySelector("[data-act=clear]").addEventListener("click",()=>{ fillInputs(key,{}); state[key].touched=false; lsDel(LS_DRAFT+key); setStatus(key,"Campi svuotati."); });
+  v.querySelector("#date-"+key).addEventListener("change",ev=>{
+    state[key].date = ev.target.value || todayISO;
+    const saved = sessions.find(s=>s.id===key+"-"+state[key].date);
+    fillInputs(key, saved? saved.ex : {});
+    state[key].touched=false; saveDraft(key); refreshLast(key);
+  });
+  v.addEventListener("input",ev=>{ if(ev.target.matches(".set input")){ state[key].touched=true; saveDraftSoon(key); } });
+  main.appendChild(v);
+  views[key]=v;
+}
+
+function card(day, base){
+  const e=variantOf(base);
+  const c=document.createElement("article"); c.className="card"; c.dataset.ex=e.id; c.dataset.base=base.id;
+  const figBox=document.createElement("div");
+  figBox.appendChild(makeFigure(e.fig, "Illustrazione animata: "+e.name));
+  c.appendChild(figBox);
+  const info=document.createElement("div"); info.className="info";
+  info.innerHTML=`
+    <div class="ex-head"><span class="num">${e.n}</span><h3>${e.name}</h3></div>
+    <div class="rx">
+      <span class="chip"><span class="k">serie</span>${e.sets} × ${e.reps}</span>
+      <span class="chip"><span class="k">rec</span>${e.rest}</span>
+      ${e.rir?`<span class="chip">${e.rir}</span>`:""}
+      <span class="chip"><span class="k">partenza</span>${e.start}</span>
+    </div>
+    <p class="note">${e.note}</p>
+    <a class="vid" href="${yt(e.q)}" target="_blank" rel="noopener">Guarda i video</a>`;
+  c.appendChild(info);
+  if(base.alts){
+    const opts=[{id:base.id,short:base.short||base.name}].concat(base.alts);
+    const box=document.createElement("div"); box.className="alts"; box.setAttribute("role","group"); box.setAttribute("aria-label","Alternative per "+(base.short||base.name));
+    box.innerHTML=`<span class="al">Variante:</span>`+opts.map(o=>`<button type="button" class="alt" data-opt="${o.id}" aria-pressed="${o.id===e.id}">${o.short}</button>`).join("");
+    box.addEventListener("click",ev=>{ const b=ev.target.closest(".alt"); if(b && b.dataset.opt!==e.id) choose(day,base,b.dataset.opt); });
+    c.appendChild(box);
+  }
+  const log=document.createElement("div"); log.className="log";
+  const F=FIELDS[e.unit];
+  let rows="";
+  for(let s=0;s<e.sets;s++){
+    rows+=`<div class="set"><span class="sl">S${s+1}</span>${F.map((f,fi)=>`<label for="in-${day}-${e.id}-${s}-${fi}"><input id="in-${day}-${e.id}-${s}-${fi}" data-ex="${e.id}" data-s="${s}" data-f="${fi}" inputmode="${f[2]}" autocomplete="off" aria-label="Serie ${s+1}, ${f[1]}">${f[0]}</label>`).join("")}</div>`;
+  }
+  log.innerHTML=`<div class="sets">${rows}</div><div class="last" data-last="${e.id}">Nessun dato salvato: parti dal carico indicato e regola dopo la prima serie.</div>`;
+  c.appendChild(log);
+  return c;
+}
+
+function readInputs(day){
+  const out={};
+  for(const e of activeEx(day)){
+    const F=FIELDS[e.unit]; const sets=[]; let any=false;
+    for(let s=0;s<e.sets;s++){
+      const row=[];
+      for(let fi=0;fi<F.length;fi++){
+        const inp=document.getElementById(`in-${day}-${e.id}-${s}-${fi}`);
+        const val=(inp.value||"").trim().replace(",",".");
+        row.push(val); if(val) any=true;
+      }
+      sets.push(row);
+    }
+    if(any){ while(sets.length && sets[sets.length-1].every(x=>!x)) sets.pop(); out[e.id]=sets; }
+  }
+  return out;
+}
+function fillInputs(day, ex){
+  for(const e of activeEx(day)){
+    const F=FIELDS[e.unit]; const sets=(ex&&ex[e.id])||[];
+    for(let s=0;s<e.sets;s++) for(let fi=0;fi<F.length;fi++){
+      const inp=document.getElementById(`in-${day}-${e.id}-${s}-${fi}`);
+      const v=sets[s]&&sets[s][fi]; inp.value = v ? fmtNum(v) : "";
+    }
+  }
+}
+function refreshLast(day){
+  const v=views[day]; if(!v) return;
+  for(const e of activeEx(day)){
+    const box=v.querySelector(`[data-last="${e.id}"]`);
+    const last=lastFor(e.id, state[day].date);
+    const F=FIELDS[e.unit];
+    if(last){
+      box.innerHTML=`Ultima volta (${fmtDate(last.date)}): <b>${fmtSets(e.unit,last.sets)}</b>`;
+      for(let s=0;s<e.sets;s++){ const src=last.sets[Math.min(s,last.sets.length-1)]||[]; for(let fi=0;fi<F.length;fi++){ document.getElementById(`in-${day}-${e.id}-${s}-${fi}`).placeholder = src[fi]?fmtNum(src[fi]):""; } }
+    } else {
+      box.textContent="Nessun dato salvato: parti dal carico indicato e regola dopo la prima serie.";
+      for(let s=0;s<e.sets;s++) for(let fi=0;fi<F.length;fi++) document.getElementById(`in-${day}-${e.id}-${s}-${fi}`).placeholder="";
+    }
+  }
+}
+function renderHistory(day){
+  const v=views[day]; if(!v) return;
+  const ul=v.querySelector(".hist");
+  const mine=sessions.filter(s=>s.day===day).sort((a,b)=>a.date<b.date?1:-1);
+  v.querySelector(".hist-block>summary").textContent=`Storico ${DAYS[day].name} (${mine.length})`;
+  if(!mine.length){ ul.innerHTML=`<li class="empty">Ancora nessuna seduta salvata. Compila le serie e premi "Salva".</li>`; return; }
+  ul.innerHTML="";
+  for(const s of mine){
+    const li=document.createElement("li");
+    const n=Object.keys(s.ex||{}).length;
+    li.innerHTML=`<span class="hd">${fmtDate(s.date)}</span><span class="hs">${n} esercizi registrati</span><button class="btn small" type="button" data-a="open">Apri</button><button class="btn small danger" type="button" data-a="del">Elimina</button>`;
+    li.querySelector("[data-a=open]").addEventListener("click",()=>{
+      state[day].date=s.date; views[day].querySelector("#date-"+day).value=s.date;
+      fillInputs(day,s.ex); state[day].touched=false; refreshLast(day); setStatus(day,`Seduta del ${fmtDate(s.date)} caricata.`);
+      views[day].querySelector(".list").scrollIntoView({behavior:reduced?"auto":"smooth"});
+    });
+    const del=li.querySelector("[data-a=del]");
+    del.addEventListener("click",()=>{
+      if(del.dataset.confirm){ del.disabled=true; deleteSession(s.id).then(()=>setStatus(day,`Seduta del ${fmtDate(s.date)} eliminata.`)).catch(()=>{ del.disabled=false; setStatus(day,"Non sono riuscito a eliminarla. Riprova."); }); }
+      else { del.dataset.confirm="1"; del.textContent="Conferma eliminazione"; setTimeout(()=>{ if(del.isConnected){ delete del.dataset.confirm; del.textContent="Elimina"; } },4000); }
+    });
+    ul.appendChild(li);
+  }
+}
+function setStatus(day,msg){ const v=views[day]; if(!v) return; v.querySelector(".status").textContent = msg + (msg?"  ":"") + modeNote(); }
+function modeNote(){
+  if(syncNote) return syncNote;
+  if(mode==="cloud") return "I carichi si salvano nel tuo account e li ritrovi su ogni dispositivo.";
+  if(mode==="local") return "I carichi restano salvati su questo telefono. Ogni tanto fai un backup dalla Guida.";
+  return "Collegamento allo storico…";
+}
+function renderStatusAll(){ for(const k in views) setStatus(k,""); }
+
+let firstLoadDone=false;
+function onSessions(){
+  for(const day in views){
+    if(!firstLoadDone){
+      const draft=lsGet(LS_DRAFT+day);
+      if(draft && draft.date){ state[day].date=draft.date; views[day].querySelector("#date-"+day).value=draft.date; fillInputs(day,draft.ex); state[day].touched=true; }
+      else { const saved=sessions.find(s=>s.id===day+"-"+state[day].date); if(saved && !state[day].touched) fillInputs(day,saved.ex); }
+    }
+    refreshLast(day); renderHistory(day);
+  }
+  firstLoadDone=true;
+}
+const draftTimers={};
+function saveDraft(day){ lsSet(LS_DRAFT+day,{date:state[day].date, ex:readInputs(day)}); }
+function saveDraftSoon(day){ clearTimeout(draftTimers[day]); draftTimers[day]=setTimeout(()=>saveDraft(day),600); }
+
+let saving=false;
+async function doSave(day){
+  if(saving) return;
+  const ex=readInputs(day);
+  if(!Object.keys(ex).length){ setStatus(day,"Scrivi almeno una serie prima di salvare."); return; }
+  const btn=views[day].querySelector("[data-act=save]");
+  saving=true; btn.disabled=true; setStatus(day,"Salvataggio…");
+  const date=state[day].date||todayISO;
+  try{
+    await saveSession({id:day+"-"+date, day, date, ex, savedAt:new Date().toISOString()});
+    lsDel(LS_DRAFT+day); state[day].touched=false;
+    setStatus(day,`${DAYS[day].name} del ${fmtDate(date)} salvata.`);
+  }catch(err){
+    const code=err&&err.code;
+    setStatus(day, code==="invalid_argument" ? "Non hai i permessi per salvare su questa pagina." : code==="quota_exceeded" ? "Spazio esaurito: elimina qualche seduta vecchia dallo storico." : "Salvataggio non riuscito. Riprova tra poco.");
+  }finally{ saving=false; btn.disabled=false; }
+}
+
+/* ---------- Guide ---------- */
+function renderGuide(){
+  const v=document.createElement("section"); v.className="view guide"; v.dataset.day="guida"; v.id="view-guida"; v.hidden=true;
+  v.innerHTML=`
+  <div class="panel">
+    <h2>Come è organizzata</h2>
+    <p>Profilo: 30 anni, 72 kg, livello intermedio, obiettivo forma e salute. Ginocchio e schiena senza problemi: il lavoro è di prevenzione e rinforzo. Niente cardio. Ogni seduta dura circa 60 minuti, riscaldamento compreso.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Giorno</th><th>Seduta</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td>Lunedì</td><td><span class="dot" style="background:var(--a)"></span><a href="#a">A</a></td><td>Squat, spinta orizzontale, quadricipite e ginocchio</td></tr>
+        <tr><td>Mercoledì</td><td><span class="dot" style="background:var(--b)"></span><a href="#b">B</a></td><td>Stacco rumeno, tirata verticale, catena posteriore</td></tr>
+        <tr><td>Venerdì</td><td><span class="dot" style="background:var(--c)"></span><a href="#c">C</a></td><td>Stacco da terra, lavoro su una gamba, tirata orizzontale</td></tr>
+      </tbody></table></div>
+    <p style="margin-top:10px">Lascia almeno un giorno di riposo tra due sedute. Quando riprendi con il calcio, tieni A e B ad almeno 48 ore dalla partita.</p>
+  </div>
+  <div class="panel">
+    <h2>RIR: quanto spingere</h2>
+    <p><b>RIR</b> significa ripetizioni in riserva: quante ripetizioni pulite ti restano prima del cedimento. RIR 2 vuol dire che ti fermi quando potresti farne ancora 2.</p>
+    <p>I carichi di <b>partenza</b> indicati su ogni esercizio sono stimati per te, prudenti. Alla prima seduta fai una serie di prova: se arrivi in fondo con molte più ripetizioni in riserva, aumenta subito; se la tecnica cede, scala.</p>
+  </div>
+  <div class="panel">
+    <h2>Progressione · blocco di 6 settimane</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Settimana</th><th>Indicazioni</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1–2</td><td>Prendi le misure dei carichi. Lavora a RIR 3 e cura la tecnica.</td></tr>
+        <tr><td class="n">3–5</td><td>Lavora a RIR 2 con la doppia progressione.</td></tr>
+        <tr><td class="n">6</td><td>Scarico: stessi esercizi, serie dimezzate, carichi −10%.</td></tr>
+      </tbody></table></div>
+    <p style="margin-top:10px"><b>Doppia progressione:</b> prima arrivi al massimo delle ripetizioni del range, poi aumenti il carico. Esempio: nello squat 4 × 6–8, quando chiudi tutte e 4 le serie a 8 ripetizioni con buona tecnica, aggiungi 2,5–5 kg e riparti da 6. Sulla parte alta aumenta di 1–2 kg. Su core e isometrie aggiungi 5–10" o una ripetizione a settimana.</p>
+    <p>Dopo lo scarico parti con un nuovo blocco, con carichi un po' più alti o qualche esercizio cambiato.</p>
+  </div>
+  <div class="panel">
+    <h2>Regole d'oro</h2>
+    <ul class="rules">
+      <li><b>Ginocchio:</b> in squat, affondi e step-down deve restare in linea con la seconda o terza dita del piede, senza cedere verso l'interno. Un fastidio fino a 3/10 è accettabile se il giorno dopo non è peggiorato.</li>
+      <li><b>Schiena:</b> prima di ogni ripetizione pesante respira e contrai l'addome come per ricevere un pugno, poi mantieni la schiena neutra.</li>
+      <li><b>Tempi:</b> se sei in ritardo taglia l'ultima serie dei complementari. Non saltare core e riscaldamento.</li>
+      <li><b>Annota tutto:</b> scrivi kg e ripetizioni di ogni serie e premi Salva a fine seduta. La volta dopo vedi i valori precedenti sotto ogni esercizio e come suggerimento nei campi.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h2>Sostituzioni</h2>
+    <p>Trap bar non disponibile: nella seduta C c'è lo <b>stacco da terra con bilanciere</b>. Nordic curl non disponibile: nella seduta B c'è il <b>leg curl</b> con discesa lenta in 3".</p>
+    <p>Su alcuni esercizi trovi la riga <b>Variante</b>: tocca un'alternativa e la scheda cambia figura, serie, note e video. La scelta resta salvata e ogni variante ha il suo storico dei carichi. Alternative disponibili:</p>
+    <ul class="rules">
+      <li><b>Hip thrust (B5):</b> glute bridge con bilanciere, pull-through al cavo, hip thrust su una gamba.</li>
+      <li><b>Stacco da terra (C1):</b> stacco sumo, goblet squat pesante, leg press 45°.</li>
+      <li><b>Suitcase carry (C6b):</b> farmer walk, suitcase hold sul posto, plank con trascinamento manubrio.</li>
+    </ul>
+    <p style="margin-top:10px">Il face pull si fa da seduti alla postazione del pulley basso, subito dopo averlo usato per il pulley.</p>
+    <p>I pulsanti video aprono una ricerca YouTube mirata sull'esercizio: scegli un video che mostri la tecnica di lato e per intero.</p>
+  </div>`;
+  const bk=document.createElement("div"); bk.className="panel"; bk.id="backup";
+  bk.innerHTML=`<h2>Dati e backup</h2>
+    <p>I carichi che salvi restano su questo telefono, dentro l'app. Se cancelli l'app dalla schermata Home o i dati del sito, si perdono: esporta un backup ogni tanto e conservalo in File o iCloud Drive.</p>
+    <div class="bk"><button class="btn" type="button" id="bk-exp">Esporta backup</button><label class="btn" for="bk-imp">Importa backup</label><input type="file" id="bk-imp" class="sr" accept="application/json,.json"></div>
+    <p id="bk-msg" aria-live="polite"></p>`;
+  v.appendChild(bk);
+  main.appendChild(v); views.guida=v;
+}
+
+/* ---------- Init + routing ---------- */
+["a","b","c"].forEach(renderDay);
+renderGuide();
+delete views.guida; const guideView=document.getElementById("view-guida");
+renderStatusAll();
+for(const f of figures){ if(io) io.observe(f.svg); else f.visible=true; }
+
+function route(){
+  const h=(location.hash||"").replace("#","");
+  const key = ["a","b","c","guida"].includes(h) ? h : "a";
+  for(const k of ["a","b","c"]) views[k].hidden = k!==key;
+  guideView.hidden = key!=="guida";
+  document.querySelectorAll("nav.tabs a").forEach(a=>{ if(a.dataset.day===key) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  if(!io){ if(!raf) raf=requestAnimationFrame(tick); }
+}
+window.addEventListener("hashchange",()=>{ route(); window.scrollTo(0,0); });
+route();
+storeReady = connect();
+if(!io && !raf) raf=requestAnimationFrame(tick);
+
+/* ---------- Backup ---------- */
+const bkMsg = t => { const m=document.getElementById("bk-msg"); if(m) m.textContent=t; };
+document.getElementById("bk-exp").addEventListener("click", async ()=>{
+  const data = {app:"scheda-abc", version:1, exported:new Date().toISOString(), sessions, prefs};
+  const name = "palestra-backup-"+todayISO+".json";
+  const blob = new Blob([JSON.stringify(data,null,1)], {type:"application/json"});
+  try{
+    const file = new File([blob], name, {type:"application/json"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:name}); bkMsg("Backup pronto: salvalo in File o iCloud Drive."); return; }
+  }catch(e){ if(e && e.name==="AbortError"){ bkMsg("Esportazione annullata."); return; } }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  bkMsg("Backup scaricato: "+name);
+});
+document.getElementById("bk-imp").addEventListener("change", async ev=>{
+  const f=ev.target.files && ev.target.files[0]; ev.target.value=""; if(!f) return;
+  try{
+    const data=JSON.parse(await f.text());
+    if(!data || data.app!=="scheda-abc" || !Array.isArray(data.sessions)) throw new Error("formato");
+    const byId=new Map(sessions.map(s=>[s.id,s]));
+    let added=0;
+    for(const s of data.sessions){
+      if(!s || !s.id || !s.day || !s.date || typeof s.ex!=="object") continue;
+      const cur=byId.get(s.id);
+      if(!cur || (s.savedAt||"")>(cur.savedAt||"")){ byId.set(s.id,s); added++; }
+    }
+    sessions=[...byId.values()]; lsSet(LS_SESS,sessions);
+    if(data.prefs && typeof data.prefs==="object"){ prefs=Object.assign({},data.prefs); lsSet(LS_PREFS,prefs); rerenderVariants(); }
+    onSessions();
+    bkMsg(added ? `Backup importato: ${added} sedute aggiornate.` : "Backup letto: nessuna seduta nuova da aggiungere.");
+  }catch(e){ bkMsg("Questo file non è un backup della scheda. Scegli il file palestra-backup-….json."); }
+});
+
+/* ---------- Offline ---------- */
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+if(navigator.storage && navigator.storage.persist){ navigator.storage.persist().catch(()=>{}); }
+})();
+</script>
+</body>
+</html>
