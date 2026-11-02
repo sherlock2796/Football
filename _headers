@@ -4,3 +4,9 @@
   Cache-Control: no-cache
 /
   Cache-Control: no-cache
+/palestra/sw.js
+  Cache-Control: no-cache
+/palestra/index.html
+  Cache-Control: no-cache
+/palestra/
+  Cache-Control: no-cache
