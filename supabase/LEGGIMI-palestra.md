@@ -13,9 +13,12 @@ sue chiavi VAPID, già salvate nei secrets delle Edge Functions. Si fa una volta
 
 Come funziona: `pg_cron` chiama la funzione alle 14:55 e alle 15:55 UTC. La
 funzione parte solo quando a Roma sono le 16:55, una volta al giorno
-(tabella `palestra_invii`). Lun/Mer/Ven: seduta A/B/C del giorno con frase
-motivazionale; gli altri giorni: riposo. Le frasi e i giorni sono in cima a
-`index.ts`. Dopo una modifica, ripubblica la funzione.
+(tabella `palestra_invii`). Lun/Mer/Ven: seduta del giorno secondo la
+rotazione a due schede (settimana del 23/11/2026 = A-B-A, la successiva
+B-A-B, e così via) con frase motivazionale; gli altri giorni: riposo. Frasi,
+giorni e data di partenza della rotazione sono in cima a `index.ts`. Dopo una
+modifica, ripubblica la funzione (Edge Functions → palestra → incolla il nuovo
+`index.ts` → Deploy).
 
 Problemi:
 - "Manca la chiave di servizio": aggiungi il secret `CHIAVE_SERVIZIO` con la chiave

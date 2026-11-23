@@ -27,12 +27,24 @@ const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:palestra@example.
 const FUSO = "Europe/Rome";
 const ORARIO = 16 * 60 + 55;          // 16:55
 const FINESTRA_MIN = 25;              // tollera ritardi del giro fino alle 17:20
-// 0 = domenica … 6 = sabato
-const SEDUTE: Record<number, { hash: string; titolo: string }> = {
-  1: { hash: "a", titolo: "Oggi Seduta A · squat e ginocchio" },
-  3: { hash: "b", titolo: "Oggi Seduta B · stacco e catena posteriore" },
-  5: { hash: "c", titolo: "Oggi Seduta C · gamba sola e stabilità" },
+// Due schede a rotazione su lunedì, mercoledì, venerdì:
+// settimana del 23/11/2026 = A-B-A, quella dopo B-A-B, e così via.
+const ANCORA = Date.UTC(2026, 10, 23);                 // lunedì 23 novembre 2026
+const POSIZIONE: Record<number, number> = { 1: 0, 3: 1, 5: 2 };  // 0 = domenica … 6 = sabato
+const SCHEDE: Record<string, string> = {
+  a: "Oggi Seduta A · core, braccia e spalle",
+  b: "Oggi Seduta B · stacco rumeno, spinte e tirate",
 };
+export function sedutaDel(giorno: string, settimana: number): string | null {
+  const pos = POSIZIONE[settimana];
+  if (pos === undefined) return null;
+  const [a, m, g] = giorno.split("-").map(Number);
+  const t = Date.UTC(a, m - 1, g);
+  const lunedi = t - ((settimana + 6) % 7) * 86400000;
+  const n = Math.round((lunedi - ANCORA) / (7 * 86400000));
+  const schema = ((n % 2) + 2) % 2 === 0 ? ["a", "b", "a"] : ["b", "a", "b"];
+  return schema[pos];
+}
 const FRASI_ALLENAMENTO = [
   "Oggi si allena. Riscaldamento, poi il primo esercizio: il resto viene da sé.",
   "Giorno di palestra. Le ginocchia forti si costruiscono una serie alla volta.",
@@ -74,9 +86,9 @@ export function oraRoma(d: Date) {
   };
 }
 const aCaso = (a: string[]) => a[Math.floor(Math.random() * a.length)];
-export function notificaDelGiorno(settimana: number): Notifica {
-  const s = SEDUTE[settimana];
-  if (s) return { titolo: s.titolo, corpo: aCaso(FRASI_ALLENAMENTO), url: "./#" + s.hash, tag: "palestra" };
+export function notificaDelGiorno(giorno: string, settimana: number): Notifica {
+  const s = sedutaDel(giorno, settimana);
+  if (s) return { titolo: SCHEDE[s], corpo: aCaso(FRASI_ALLENAMENTO), url: "./#" + s, tag: "palestra" };
   return { titolo: "Giorno di riposo", corpo: aCaso(FRASI_RIPOSO), url: "./#guida", tag: "palestra" };
 }
 
@@ -152,8 +164,9 @@ Deno.serve(async (req: Request) => {
     const { data, error } = await admin.from("palestra_push").select("*").eq("endpoint", corpo.endpoint).maybeSingle();
     if (error) return json({ errore: erroreDb(error.message) }, 500);
     if (!data) return json({ errore: "Questo telefono non risulta iscritto: tocca di nuovo Attiva notifiche" }, 404);
-    const oggi = notificaDelGiorno(oraRoma(new Date()).settimana);
-    const esito = await invia(admin, data, { titolo: "Notifiche attive", corpo: `Alle 16:55 arriva il promemoria. Oggi sarebbe: ${oggi.titolo.toLowerCase()}.`, url: "./#guida", tag: "palestra-prova" });
+    const r = oraRoma(new Date());
+    const oggi = notificaDelGiorno(r.giorno, r.settimana);
+    const esito = await invia(admin, data, { titolo: "Notifiche attive", corpo: `Alle 16:55 arriva il promemoria. Quello di oggi: ${oggi.titolo}.`, url: "./#guida", tag: "palestra-prova" });
     return esito === true ? json({ ok: true }) : json({ errore: esito }, 502);
   }
 
@@ -170,7 +183,7 @@ Deno.serve(async (req: Request) => {
     }
     const { data: abbonamenti, error } = await admin.from("palestra_push").select("*");
     if (error) return json({ errore: erroreDb(error.message) }, 500);
-    const n = notificaDelGiorno(adesso.settimana);
+    const n = notificaDelGiorno(adesso.giorno, adesso.settimana);
     const esito = { giorno: adesso.giorno, titolo: n.titolo, telefoni: abbonamenti?.length ?? 0, inviate: 0, errori: [] as string[] };
     for (const a of (abbonamenti ?? []) as Abbonamento[]) {
       const r = await invia(admin, a, n);
