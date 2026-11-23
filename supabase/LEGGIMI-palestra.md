@@ -25,3 +25,17 @@ Problemi:
   `service_role` (Project Settings → API), come per Impegni.
 - "Tabelle mancanti": esegui `supabase/palestra.sql`.
 - Esito degli invii: `select * from palestra_invii order by giorno desc;`
+
+# Sincronizzazione dei carichi tra dispositivi
+
+Tabella `palestra_sedute` (script `supabase/palestra-sync.sql`, già eseguito sul
+progetto): una riga per seduta salvata, visibile e modificabile solo dal suo
+utente (RLS). Nell'app: Guida → *Sincronizzazione telefono e PC* → accedi con
+la stessa email e password di Impegni, su ogni dispositivo.
+
+- Offline l'app salva sul dispositivo e invia appena torna la rete.
+- Sincronizza all'apertura, al ritorno in primo piano, dopo ogni salvataggio
+  ed eliminazione, e ogni minuto mentre è aperta.
+- Se la stessa seduta viene cambiata su due dispositivi vale il salvataggio
+  più recente; le eliminazioni si propagano.
+- Al primo accesso su un dispositivo, quello che c'era solo lì viene caricato.
