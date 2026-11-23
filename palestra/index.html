@@ -106,7 +106,7 @@ details.block .inner{padding:0 14px 14px}
 .num{font-family:var(--display);font-weight:700;font-size:1rem;background:var(--day);color:var(--on-day);border-radius:6px;padding:1px 7px;flex:none}
 .ex-head h3{font-size:1.3rem;font-weight:600}
 .rx{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-family:var(--display);font-weight:600;font-size:1rem;padding:1px 8px;border-radius:6px;background:var(--sunk);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{max-width:100%;font-family:var(--display);font-weight:600;font-size:1rem;padding:1px 8px;border-radius:6px;background:var(--sunk);font-variant-numeric:tabular-nums;white-space:normal}
 .chip .k{color:var(--muted);font-weight:500;margin-right:4px}
 .note{margin:0;color:var(--muted);font-size:.95rem}
 .vid{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.92rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 6px;justify-self:start}
@@ -189,7 +189,15 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 .bk{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .bk .btn{margin:0}
 .btn.go{background:var(--a);color:var(--on-a);border-color:var(--a)}
-.push-state{font-weight:600}
+.push-state,.sync-state{font-weight:600}
+.sync-form{display:grid;gap:6px;max-width:360px;margin:6px 0 4px}
+.sync-form label{font-size:.9rem;color:var(--muted)}
+.sync-form input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.sync-form .btn{justify-self:start;margin-top:6px}
+.panel .note{color:var(--muted);font-size:.9rem}
+.syncpill{margin-left:auto;font-size:.82rem;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.syncpill[data-state="ok"]{color:var(--c);border-color:var(--c)}
+.syncpill[data-state="wait"]{color:var(--b);border-color:var(--b)}
 #bk-msg{margin-top:10px;color:var(--muted);font-size:.92rem}
 </style>
 </head>
@@ -365,7 +373,10 @@ const DAYS = {
    fig:LEGCURL_FIG},
   {id:"legextmono",n:"8",name:"Leg extension a una gamba",sets:2,reps:"12 per gamba",rest:"60\"",rir:"RIR 2",unit:"kg",start:"15 kg",
    note:"Una gamba alla volta. Tieni 1\" in estensione completa e scendi in 3\". Lavora il vasto mediale, che stabilizza la rotula.",q:"leg extension una gamba",
-   fig:LEGEXT_FIG}
+   fig:LEGEXT_FIG},
+  {id:"calf",n:"9",name:"Calf raise in piedi",sets:3,reps:"12",rest:"60\"",rir:"RIR 2",unit:"kg",start:"16 kg (manubrio)",
+   note:"Con un manubrio su uno step, oppure alla macchina (parti da circa 40 kg). Avampiede sul bordo, ginocchia distese. Sali in punta e tieni 2\" in alto, poi scendi in 3\" sotto il livello dello step.",q:"calf raise in piedi tecnica corretta",
+   fig:{vb:"0 -8 120 100",base:{anchor:"T1",at:[62,80],t:-90,a1:[80,94]},from:{l1:[90,90,-25]},to:{l1:[90,90,40]},props:[{k:"rect",x:58,y:80,w:34,h:12,rx:1.5},{k:"db",j:"W1"}]}}
  ]},
  b:{ name:"Seduta B", focus:"Stacco rumeno, spinte e tirate, braccia, gambe a una gamba", ex:[
   {id:"rdl",n:"1",name:"Stacco rumeno con bilanciere",sets:3,reps:"8",rest:"2'",rir:"RIR 2",unit:"kg",start:"40 kg",
@@ -395,7 +406,11 @@ const DAYS = {
   {id:"legpressmono",n:"8",name:"Leg press 45° a una gamba",sets:3,reps:"8 per gamba",rest:"90\"",rir:"RIR 2",unit:"kg",start:"40 kg (carico aggiunto)",
    note:"Piede al centro della pedana. Il ginocchio segue la punta del piede senza cedere verso l'interno. Scendi finché il bacino resta attaccato allo schienale.",q:"leg press una gamba tecnica",
    fig:{base:{anchor:"P",at:[40,72],t:-150,a1:[60,0],l2:[-60,60,-30]},from:{l1:[-35,-35,-125]},to:{l1:[-83,17,-125]},
-        props:[{k:"line",x1:38,y1:75,x2:16,y2:62,sw:4},{k:"line",x1:38,y1:76,x2:50,y2:76,sw:4},{k:"rect",x:32,y:78,w:6,h:14},{k:"line",x1:60,y1:86,x2:106,y2:54,sw:2},{k:"jline",a:"A1",b:"T1",ext:5,sw:3,off:[1.6,-1.2]}]}}
+        props:[{k:"line",x1:38,y1:75,x2:16,y2:62,sw:4},{k:"line",x1:38,y1:76,x2:50,y2:76,sw:4},{k:"rect",x:32,y:78,w:6,h:14},{k:"line",x1:60,y1:86,x2:106,y2:54,sw:2},{k:"jline",a:"A1",b:"T1",ext:5,sw:3,off:[1.6,-1.2]}]}},
+  {id:"legcurlseduto",n:"9",name:"Leg curl seduto",sets:2,reps:"12",rest:"60\"",rir:"RIR 2",unit:"kg",start:"30 kg",
+   note:"Schiena appoggiata, cuscinetto ben fermo sopra le ginocchia, rullo appena sopra i talloni. Piega in 1\", tieni un attimo e torna in 3\" senza far ripartire il peso di colpo.",q:"leg curl seduto esecuzione corretta",
+   fig:{base:{anchor:"P",at:[52,62],t:-100,a1:[80,10]},from:{l1:[0,10,-80]},to:{l1:[0,110,-10]},
+        props:[{k:"rect",x:30,y:64,w:44,h:5},{k:"rect",x:35,y:28,w:5,h:36},{k:"rect",x:48,y:69,w:4,h:23},{k:"box",j:"K1",w:12,h:4,dx:-5,dy:-5},{k:"pad",j:"A1",r:3,dx:1,dy:3}]}}
  ]}
 };
 
@@ -456,15 +471,87 @@ const connect = async ()=>{
   renderStatusAll();
 };
 
+/* ---------- Sincronizzazione con Supabase (stesso account di Impegni) ---------- */
+const SB_URL = "https://siifawqmapfdybhvyeyi.supabase.co";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaWZhd3FtYXBmZHliaHZ5ZXlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTM0ODQsImV4cCI6MjEwNjU4OTQ4NH0.DO905PmXOvOzBKVH1HJT-DPa-kDNHeDHSH78EkZdzKM"; // chiave pubblica "anon": i dati sono protetti dalle regole per riga
+const SB_LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
+const LS_SYNC = "scheda-abc-sync-v1";
+const syncMeta = Object.assign({dirty:{}, tomb:{}, bookmark:null, last:null}, lsGet(LS_SYNC)||{});
+const saveMeta = () => lsSet(LS_SYNC, syncMeta);
+let sb = null, sbUser = null, syncing = false, syncAgain = false, syncTimer = 0, syncErr = "";
+const tms = t => t ? (Date.parse(t) || 0) : 0;
+async function sbClient(){
+  if(sb) return sb;
+  const { createClient } = await import(SB_LIB);
+  sb = createClient(SB_URL, SB_ANON, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:false, storageKey:"palestra-auth" } });
+  return sb;
+}
+function syncStatusText(){
+  if(!sbUser) return "I carichi restano su questo dispositivo. Per averli anche sugli altri, accedi in Guida → Sincronizzazione.";
+  if(syncing) return "Sincronizzazione in corso…";
+  const pending = Object.keys(syncMeta.dirty).length;
+  if(pending && !navigator.onLine) return "Salvato qui: si sincronizza appena torni online.";
+  if(syncErr) return "Ultima sincronizzazione non riuscita: "+syncErr;
+  if(pending) return "In attesa di sincronizzazione.";
+  return "Sincronizzato con il tuo account.";
+}
+function syncSoon(delay){ clearTimeout(syncTimer); syncTimer = setTimeout(()=>{ syncNow(); }, delay ?? 800); }
+async function syncNow(){
+  if(!sbUser || !sb) return;
+  if(syncing){ syncAgain = true; return; }
+  if(!navigator.onLine){ renderSync(); return; }
+  syncing = true; renderSync();
+  try{
+    // 1) scarico le novità dal server (segnalibro = ora del server, con 5" di margine)
+    let q = sb.from("palestra_sedute").select("id,scheda,data,esercizi,salvata_il,eliminata,sincronizzato_il").order("sincronizzato_il",{ascending:true}).limit(1000);
+    if(syncMeta.bookmark) q = q.gt("sincronizzato_il", new Date(tms(syncMeta.bookmark)-5000).toISOString());
+    const { data:rows, error:e1 } = await q; if(e1) throw e1;
+    let changed = false;
+    for(const r of rows||[]){
+      if(!syncMeta.bookmark || tms(r.sincronizzato_il) > tms(syncMeta.bookmark)) syncMeta.bookmark = r.sincronizzato_il;
+      const loc = sessions.find(s=>s.id===r.id);
+      const locT = loc ? tms(loc.savedAt) : tms(syncMeta.tomb[r.id]);
+      if(locT && locT >= tms(r.salvata_il)) continue;            // qui ho la stessa versione o una più recente
+      if(r.eliminata){ if(loc){ sessions = sessions.filter(s=>s.id!==r.id); changed = true; } syncMeta.tomb[r.id] = r.salvata_il; }
+      else { sessions = sessions.filter(s=>s.id!==r.id).concat([{id:r.id, day:r.scheda, date:r.data, ex:r.esercizi||{}, savedAt:r.salvata_il}]); delete syncMeta.tomb[r.id]; changed = true; }
+      delete syncMeta.dirty[r.id];
+    }
+    if(changed){ lsSet(LS_SESS, sessions); onSessions(); }
+    // 2) invio le modifiche fatte qui
+    const ids = Object.keys(syncMeta.dirty);
+    if(ids.length){
+      const versione = {};
+      const righe = ids.map(id=>{
+        const s = sessions.find(x=>x.id===id);
+        if(s){ versione[id] = s.savedAt; return {user_id:sbUser.id, id, scheda:s.day, data:s.date, esercizi:s.ex||{}, salvata_il:s.savedAt||new Date().toISOString(), eliminata:false}; }
+        const t = syncMeta.tomb[id] || new Date().toISOString(); versione[id] = t;
+        const m = /^([a-z]+)-(\d{4}-\d{2}-\d{2})$/.exec(id) || [null,"a",todayISO];
+        return {user_id:sbUser.id, id, scheda:m[1], data:m[2], esercizi:{}, salvata_il:t, eliminata:true};
+      });
+      const { error:e2 } = await sb.from("palestra_sedute").upsert(righe, {onConflict:"user_id,id"});
+      if(e2) throw e2;
+      for(const id of ids){ const s = sessions.find(x=>x.id===id); const now = s ? s.savedAt : syncMeta.tomb[id]; if(now===versione[id]) delete syncMeta.dirty[id]; }
+    }
+    syncMeta.last = new Date().toISOString(); syncErr = "";
+  }catch(e){
+    const m = (e && (e.message||e.error_description)) || String(e);
+    syncErr = /fetch|network|load failed/i.test(m) ? "rete non raggiungibile" : /jwt|token|auth/i.test(m) ? "accesso scaduto, entra di nuovo" : m;
+  }finally{
+    saveMeta(); syncing = false; renderSync();
+    if(syncAgain){ syncAgain = false; syncSoon(300); }
+  }
+}
 async function saveSession(doc){
   await storeReady;
-  if(mode==="cloud"){ await col.doc(doc.id).set({day:doc.day,date:doc.date,ex:doc.ex,savedAt:doc.savedAt}); }
-  else { sessions = sessions.filter(s=>s.id!==doc.id).concat([doc]); lsSet(LS_SESS,sessions); onSessions(); }
+  sessions = sessions.filter(s=>s.id!==doc.id).concat([doc]); lsSet(LS_SESS, sessions);
+  syncMeta.dirty[doc.id] = 1; delete syncMeta.tomb[doc.id]; saveMeta();
+  onSessions(); syncSoon();
 }
 async function deleteSession(id){
   await storeReady;
-  if(mode==="cloud"){ await col.doc(id).delete(); }
-  else { sessions = sessions.filter(s=>s.id!==id); lsSet(LS_SESS,sessions); onSessions(); }
+  sessions = sessions.filter(s=>s.id!==id); lsSet(LS_SESS, sessions);
+  syncMeta.tomb[id] = new Date().toISOString(); syncMeta.dirty[id] = 1; saveMeta();
+  onSessions(); syncSoon();
 }
 
 /* ---------- Variants (alternatives) ---------- */
@@ -666,7 +753,7 @@ function setStatus(day,msg){ const v=views[day]; if(!v) return; v.querySelector(
 function modeNote(){
   if(syncNote) return syncNote;
   if(mode==="cloud") return "I carichi si salvano nel tuo account e li ritrovi su ogni dispositivo.";
-  if(mode==="local") return "I carichi restano salvati su questo telefono. Ogni tanto fai un backup dalla Guida.";
+  if(mode==="local") return syncStatusText();
   return "Collegamento allo storico…";
 }
 function renderStatusAll(){ for(const k in views) setStatus(k,""); }
@@ -777,7 +864,25 @@ function renderGuide(){
     <p>Gli esercizi "a una gamba" (leg curl, leg extension, leg press) si fanno prima con una gamba e poi con l'altra: le ripetizioni indicate valgono per ciascuna. Segna nel registro il carico usato per una gamba.</p>
     <p>I pulsanti video aprono una ricerca YouTube mirata sull'esercizio: scegli un video che mostri la tecnica di lato e per intero.</p>
   </div>
-  <div class="panel" id="notifiche">
+  <div class="panel" id="sincronizzazione">
+    <h2>Sincronizzazione telefono e PC</h2>
+    <p>Accedi con la <b>stessa email e password di Impegni</b>: i carichi si allineano da soli su tutti i dispositivi dove hai fatto l'accesso. Offline continui a salvare qui; le modifiche partono appena torna la rete. Se la stessa seduta viene cambiata su due dispositivi, vale il salvataggio più recente.</p>
+    <form id="sync-form" class="sync-form" novalidate>
+      <label for="sync-email">Email</label>
+      <input id="sync-email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
+      <label for="sync-pass">Password</label>
+      <input id="sync-pass" type="password" autocomplete="current-password" required>
+      <button class="btn go" type="submit" id="sync-login">Accedi</button>
+    </form>
+    <div id="sync-on" hidden>
+      <p class="sync-who"></p>
+      <div class="bk"><button class="btn" type="button" id="sync-now">Sincronizza ora</button><button class="btn" type="button" id="sync-out">Esci</button></div>
+    </div>
+    <p class="sync-state" aria-live="polite"></p>
+    <p class="note">Password dimenticata? Reimpostala dall'app Impegni: l'account è lo stesso.</p>
+  </div>
+  
+<div class="panel" id="notifiche">
     <h2>Notifiche alle 16:55</h2>
     <p>Ogni giorno alle 16:55 ti arriva un promemoria. Nei giorni di allenamento ti dice quale seduta fare, con una frase motivazionale; nei giorni di riposo ti suggerisce qualcosa di leggero. Toccando la notifica si apre la seduta del giorno.</p>
     <p class="push-state" aria-live="polite">Controllo lo stato delle notifiche…</p>
@@ -870,14 +975,69 @@ document.getElementById("bk-imp").addEventListener("change", async ev=>{
     for(const s of data.sessions){
       if(!s || !s.id || !s.day || !s.date || typeof s.ex!=="object") continue;
       const cur=byId.get(s.id);
-      if(!cur || (s.savedAt||"")>(cur.savedAt||"")){ byId.set(s.id,s); added++; }
+      if(!cur || (s.savedAt||"")>(cur.savedAt||"")){ byId.set(s.id,s); added++; syncMeta.dirty[s.id]=1; }
     }
-    sessions=[...byId.values()]; lsSet(LS_SESS,sessions);
+    sessions=[...byId.values()]; lsSet(LS_SESS,sessions); saveMeta(); syncSoon();
     if(data.prefs && typeof data.prefs==="object"){ prefs=Object.assign({},data.prefs); lsSet(LS_PREFS,prefs); rerenderVariants(); }
     onSessions();
     bkMsg(added ? `Backup importato: ${added} sedute aggiornate.` : "Backup letto: nessuna seduta nuova da aggiungere.");
   }catch(e){ bkMsg("Questo file non è un backup della scheda. Scegli il file palestra-backup-….json."); }
 });
+
+/* ---------- Sincronizzazione: interfaccia ---------- */
+const syncEls = { form:document.getElementById("sync-form"), email:document.getElementById("sync-email"), pass:document.getElementById("sync-pass"), login:document.getElementById("sync-login"),
+  on:document.getElementById("sync-on"), who:document.querySelector(".sync-who"), now:document.getElementById("sync-now"), out:document.getElementById("sync-out"), st:document.querySelector(".sync-state") };
+const syncPill = document.createElement("span"); syncPill.className = "syncpill"; todayBar.appendChild(syncPill);
+let loginMsg = "";
+function renderSync(){
+  if(!syncEls.form) return;
+  syncEls.form.hidden = !!sbUser; syncEls.on.hidden = !sbUser;
+  if(sbUser) syncEls.who.textContent = "Collegato come " + (sbUser.email || "utente") + ".";
+  const quando = syncMeta.last ? new Date(syncMeta.last).toLocaleString("it-IT",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+  syncEls.st.textContent = (!sbUser && loginMsg) ? loginMsg : syncStatusText() + (sbUser && quando && !syncing ? " Ultima: " + quando + "." : "");
+  syncPill.textContent = !sbUser ? "Solo su questo dispositivo" : syncing ? "Sincronizzazione…" : (syncErr || Object.keys(syncMeta.dirty).length) ? "Da sincronizzare" : "Sincronizzato";
+  syncPill.dataset.state = !sbUser ? "off" : (syncErr || Object.keys(syncMeta.dirty).length) ? "wait" : "ok";
+}
+syncEls.form.addEventListener("submit", async ev=>{
+  ev.preventDefault();
+  const email = syncEls.email.value.trim(), password = syncEls.pass.value;
+  if(!email || !password){ syncEls.st.textContent = "Scrivi email e password."; return; }
+  syncEls.login.disabled = true; loginMsg = ""; syncEls.st.textContent = "Accesso…";
+  try{
+    const c = await sbClient();
+    const { data, error } = await c.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    sbUser = data.user; syncEls.pass.value = "";
+    // Primo accesso su questo dispositivo: carico tutto ciò che c'è qui e scarico tutto dal server.
+    for(const s of sessions) syncMeta.dirty[s.id] = 1;
+    for(const id in syncMeta.tomb) syncMeta.dirty[id] = 1;
+    syncMeta.bookmark = null; saveMeta();
+    await syncNow();
+  }catch(e){
+    const m = (e && e.message) || String(e);
+    loginMsg = /invalid login|invalid credentials/i.test(m) ? "Email o password non corrette." : /fetch|network|load failed|import/i.test(m) ? "Rete non raggiungibile: riprova quando sei online." : "Accesso non riuscito: " + m;
+  }finally{ syncEls.login.disabled = false; renderSync(); }
+});
+syncEls.now.addEventListener("click", ()=>syncNow());
+syncEls.out.addEventListener("click", async ()=>{
+  syncEls.out.disabled = true;
+  try{ if(sb) await sb.auth.signOut(); }catch(e){}
+  sbUser = null; syncMeta.bookmark = null; saveMeta();
+  syncEls.out.disabled = false; renderSync(); renderStatusAll();
+});
+window.addEventListener("online", ()=>syncSoon(300));
+setInterval(()=>{ if(sbUser && document.visibilityState==="visible") syncNow(); }, 60000);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") syncSoon(300); });
+renderSync();
+(async ()=>{
+  try{
+    const c = await sbClient();
+    c.auth.onAuthStateChange((evento, sessione)=>{ const prima = sbUser; sbUser = sessione ? sessione.user : null; renderSync(); if(sbUser && !prima) syncSoon(100); });
+    const { data } = await c.auth.getSession();
+    sbUser = data && data.session ? data.session.user : null; renderSync(); renderStatusAll();
+    if(sbUser) syncNow();
+  }catch(e){ if(!navigator.onLine) return; syncErr = "servizio di sincronizzazione non raggiungibile"; renderSync(); }
+})();
 
 /* ---------- Push notifications ---------- */
 const PUSH_URL = "https://siifawqmapfdybhvyeyi.supabase.co/functions/v1/palestra";
