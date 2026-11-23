@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Palestra">
-<title>Palestra A·B·C</title>
+<title>Palestra A·B</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
@@ -67,6 +67,13 @@ nav.tabs a[data-day="c"] .disc{background:var(--c);color:var(--on-c)}
 nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--ink)}
 
 main{padding-block:20px 40px}
+.todaybar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:18px;font-size:.98rem}
+.todaybar b{font-weight:700}
+.todaybar .wk{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--muted);font-size:.9rem}
+.todaybar .grp{display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
+.todaybar .pl{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.8rem}
+.todaybar .pl.a{background:var(--a);color:var(--on-a)} .todaybar .pl.b{background:var(--b);color:var(--on-b)}
+.todaybar a{font-weight:700}
 .view[data-day="a"]{--day:var(--a);--on-day:var(--on-a)}
 .view[data-day="b"]{--day:var(--b);--on-day:var(--on-b)}
 .view[data-day="c"]{--day:var(--c);--on-day:var(--on-c)}
@@ -190,11 +197,10 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 
 <header class="top">
   <div class="wrap">
-    <div class="brand">Scheda A·B·C <small>full body · 3×/sett.</small></div>
+    <div class="brand">Scheda A·B <small>3×/sett. a rotazione</small></div>
     <nav class="tabs" aria-label="Sedute">
-      <a href="#a" data-day="a"><span class="disc">A</span><span class="lbl">Squat</span></a>
-      <a href="#b" data-day="b"><span class="disc">B</span><span class="lbl">Stacco</span></a>
-      <a href="#c" data-day="c"><span class="disc">C</span><span class="lbl">Gamba sola</span></a>
+      <a href="#a" data-day="a"><span class="disc">A</span><span class="lbl">Core e braccia</span></a>
+      <a href="#b" data-day="b"><span class="disc">B</span><span class="lbl">Stacco e spinte</span></a>
       <a href="#guida" data-day="guida"><span class="disc">?</span><span class="lbl">Guida</span></a>
     </nav>
   </div>
@@ -243,7 +249,8 @@ const pts = arr => arr.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
 
 function buildPose(g, def){
   const back = el("g",{},g), body = el("g",{},g), front = el("g",{},g);
-  const far1 = el("polyline",{class:"far"},body), far2 = el("polyline",{class:"far"},body);
+  const farCls = def.front ? "near" : "far";
+  const far1 = el("polyline",{class:farCls},body), far2 = el("polyline",{class:farCls},body);
   const torso = el("line",{class:"torso"},body), head = el("circle",{class:"head",r:5.4},body);
   const near1 = el("polyline",{class:"near"},body), near2 = el("polyline",{class:"near"},body);
   const dyn = [];
@@ -323,141 +330,94 @@ const WARM = [
 ];
 
 // unit: kg = [kg, rip]; bw = [+kg, rip]; s = [sec]; m = [kg, m]
+const LEGCURL_FIG = {base:{anchor:"P",at:[55,65],t:180,h:178,a1:[100,60],off:[-1.5,-1.5]},from:{l1:[0,0,90],l2:[2,2,90]},to:{l1:[0,-95,180],l2:[2,2,90]},
+  props:[{k:"rect",x:20,y:69,w:62,h:5},{k:"rect",x:30,y:74,w:4,h:18},{k:"rect",x:70,y:74,w:4,h:18},{k:"pad",j:"A1",r:3,dx:1.5,dy:-2}]};
+const LEGEXT_FIG = {base:{anchor:"P",at:[52,60],t:-95,a1:[100,20],l2:[1,92,2]},from:{l1:[0,90,0]},to:{l1:[0,5,-85]},
+  props:[{k:"rect",x:30,y:62,w:44,h:5},{k:"rect",x:38,y:28,w:5,h:34},{k:"rect",x:50,y:67,w:4,h:25},{k:"pad",j:"A1",r:3.2,dx:1,dy:1}]};
+const PANCA_FIG = {base:{anchor:"P",at:[70,62],t:180,h:180,l1:[30,95,0],off:[-2,-1]},from:{a1:[170,-60]},to:{a1:[280,-90]},
+  props:[{k:"rect",x:28,y:65,w:54,h:4},{k:"rect",x:34,y:69,w:4,h:23},{k:"rect",x:72,y:69,w:4,h:23},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]};
 const DAYS = {
- a:{ name:"Seduta A", focus:"Squat, spinta orizzontale, quadricipite e ginocchio", ex:[
-  {id:"squat",n:"1",name:"Back squat",sets:4,reps:"6–8",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"40 kg",
-   note:"Scendi controllato in 3\". Le ginocchia seguono la direzione delle punte e possono superarle.",q:"back squat bilanciere tecnica corretta",
-   fig:{base:{anchor:"A1",at:[62,90]},from:{t:-90,l1:[90,90,0],a1:[135,-63]},to:{t:-55,l1:[10,115,0],a1:[165,-30]},props:[{k:"plate",j:"N",dx:-3,dy:2,r:8.5,back:true}]}},
-  {id:"panca",n:"2",name:"Panca piana con manubri",sets:3,reps:"8–10",rest:"2'",rir:"RIR 2",unit:"kg",start:"14 kg per mano",
-   note:"Scapole addotte, piedi ben piantati, gomiti a circa 45° dal busto.",q:"panca piana manubri esecuzione corretta",
-   fig:{base:{anchor:"P",at:[70,62],t:180,h:180,l1:[30,95,0],off:[-2,-1]},from:{a1:[170,-60]},to:{a1:[280,-90]},
-        props:[{k:"rect",x:28,y:65,w:54,h:4},{k:"rect",x:34,y:69,w:4,h:23},{k:"rect",x:72,y:69,w:4,h:23},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
-  {id:"bulgaro",n:"3a",name:"Split squat bulgaro",sets:3,reps:"8 per gamba",rest:"–",unit:"kg",start:"8 kg per mano",
-   note:"Busto leggermente inclinato in avanti. Il ginocchio anteriore non deve cedere verso l'interno.",q:"squat bulgaro manubri tecnica",
-   fig:{base:{anchor:"A1",at:[72,90],a1:[90,90]},from:{t:-80,l1:[75,95,0],l2:[120,170,180]},to:{t:-75,l1:[15,110,0],l2:[100,221,180]},
-        props:[{k:"rect",x:22,y:75,w:24,h:5},{k:"rect",x:25,y:80,w:3,h:12},{k:"rect",x:40,y:80,w:3,h:12},{k:"db",j:"W1"}]}},
-  {id:"rematore",n:"3b",name:"Rematore con manubrio",sets:3,reps:"10 per lato",rest:"90\"",unit:"kg",start:"18 kg",
-   note:"Mano e ginocchio sulla panca. Tira portando il gomito verso l'anca, schiena piatta.",q:"rematore manubrio un braccio panca tecnica",
-   fig:{base:{anchor:"P",at:[45,54],t:-10,l1:[100,95,0],l2:[90,180,180],a2:[90,90]},from:{a1:[90,90]},to:{a1:[225,90]},
-        props:[{k:"rect",x:22,y:74.5,w:66,h:4.5},{k:"rect",x:26,y:79,w:3,h:13},{k:"rect",x:82,y:79,w:3,h:13},{k:"db",j:"W1"}]}},
-  {id:"legext",n:"4",name:"Leg extension",sets:3,reps:"12–15",rest:"75\"",unit:"kg",start:"25 kg",
-   note:"Tieni 1\" in estensione completa e scendi in 3\". Lavora il vasto mediale, che stabilizza la rotula.",q:"leg extension esecuzione corretta",
-   fig:{base:{anchor:"P",at:[52,60],t:-95,a1:[100,20]},from:{l1:[0,90,0]},to:{l1:[0,5,-85]},
-        props:[{k:"rect",x:30,y:62,w:44,h:5},{k:"rect",x:38,y:28,w:5,h:34},{k:"rect",x:50,y:67,w:4,h:25},{k:"pad",j:"A1",r:3.2,dx:1,dy:1}]}},
-  {id:"copenhagen",n:"5",name:"Copenhagen plank (versione corta)",sets:3,reps:"20–30\" per lato",rest:"45\"",unit:"s",start:"20\"",
-   note:"Ginocchio della gamba sopra appoggiato sulla panca. Rinforza gli adduttori: ottima prevenzione per ginocchio e pube.",q:"copenhagen plank short lever",
-   fig:{base:{anchor:"E2",at:[24,89],a1:[-15,-15],a2:[90,0]},from:{t:165,l1:[-12,-5,0],l2:[-2,0,0]},to:{t:175,l1:[-20,-3,0],l2:[45,10,0]},
-        props:[{k:"rect",x:60,y:67,w:44,h:5},{k:"rect",x:63,y:72,w:3,h:20},{k:"rect",x:98,y:72,w:3,h:20}]}},
-  {id:"deadbug",n:"6a",name:"Dead bug",sets:3,reps:"8 per lato",rest:"–",unit:"bw",start:"corpo libero",
-   note:"Zona lombare schiacciata a terra. Espira mentre allunghi braccio e gamba opposti.",q:"dead bug esercizio core corretto",
-   fig:{base:{anchor:"P",at:[70,86],t:180,h:180,l2:[-90,0,-90],a2:[-90,-90],off:[-2,-1]},from:{l1:[-90,0,-90],a1:[-90,-90]},to:{l1:[-10,-5,-80],a1:[-170,-170]}}},
-  {id:"pallof",n:"6b",name:"Pallof press al cavo",sets:3,reps:"10 per lato",rest:"60\"",unit:"kg",start:"10 kg",
-   note:"Di fianco al cavo. Spingi le mani avanti e tieni 2\" a braccia tese senza far ruotare il busto.",q:"pallof press cavo esecuzione",
-   fig:{base:{anchor:"A1",at:[62,90],t:-88,l1:[80,98,0]},from:{a1:[100,-30]},to:{a1:[8,5]},
-        props:[{k:"rect",x:10,y:10,w:6,h:82},{k:"cable",from:[16,46],j:"W1"}]}}
+ a:{ name:"Seduta A", focus:"Core, braccia e spalle, rematore, femorali e quadricipiti a una gamba", ex:[
+  {id:"plank",n:"1",name:"Plank frontale",sets:2,reps:"60\"",rest:"60\"",unit:"s",start:"60\"",
+   note:"Sugli avambracci, gomiti sotto le spalle. Glutei e addome contratti, bacino in linea: non deve cadere né salire.",q:"plank frontale esecuzione corretta",
+   fig:{period:3600,base:{anchor:"A1",at:[95,87],a1:[90,180],a2:[90,180]},from:{t:188.8,l1:[8.8,8.8,115]},to:{t:190.5,l1:[7.5,7.5,115]}}},
+  {id:"curlpanca45",n:"2",name:"Curl bicipiti su panca a 45°",sets:3,reps:"10",rest:"75\"",rir:"RIR 2",unit:"kg",start:"8 kg per mano",
+   note:"Schiena appoggiata, braccia che pendono dietro il busto. Sali senza portare avanti i gomiti e scendi fino a braccio quasi teso.",q:"curl bicipiti panca inclinata manubri",
+   fig:{base:{anchor:"P",at:[62,66],t:225,h:240,l1:[15,95,0],off:[-2,-1]},from:{a1:[95,95]},to:{a1:[95,-60]},
+        props:[{k:"line",x1:60,y1:69,x2:41,y2:50,sw:4},{k:"line",x1:57,y1:70,x2:77,y2:70,sw:4},{k:"rect",x:58,y:72,w:4,h:20},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
+  {id:"frenchdb",n:"3",name:"French press con manubri",sets:3,reps:"10",rest:"75\"",rir:"RIR 2",unit:"kg",start:"10 kg (un manubrio)",
+   note:"Sdraiato sulla panca, braccia verticali. Piega solo i gomiti portando il manubrio dietro la testa, gomiti fermi e stretti.",q:"french press manubri panca piana",
+   fig:{base:{anchor:"P",at:[70,62],t:180,h:180,l1:[30,95,0],off:[-2,-1]},from:{a1:[-100,-100]},to:{a1:[-100,-195]},
+        props:[{k:"rect",x:28,y:65,w:54,h:4},{k:"rect",x:34,y:69,w:4,h:23},{k:"rect",x:72,y:69,w:4,h:23},{k:"db",j:"W1"}]}},
+  {id:"alzatelat",n:"4",name:"Alzate laterali in piedi",sets:3,reps:"10",rest:"60\"",rir:"RIR 2",unit:"kg",start:"6 kg per mano",
+   note:"Gomiti appena piegati, sali fino all'altezza delle spalle e non oltre. Niente slancio col busto.",q:"alzate laterali manubri tecnica corretta",
+   fig:{front:true,base:{anchor:"P",at:[60,51],t:-90,l1:[84,90,5],l2:[96,90,175]},from:{a1:[82,92],a2:[98,88]},to:{a1:[8,-2],a2:[172,182]},
+        props:[{k:"db",j:"W1"},{k:"db",j:"W2"}]}},
+  {id:"rowmacchina",n:"5",name:"Seated row alla macchina",sets:3,reps:"10",rest:"90\"",rir:"RIR 2",unit:"kg",start:"35 kg",
+   note:"Petto contro l'appoggio, tira portando i gomiti indietro e stringi le scapole. Torna in avanti controllato.",q:"seated row machine tecnica",
+   fig:{base:{anchor:"P",at:[40,72],l1:[0,20,-80]},from:{t:-85,a1:[10,5]},to:{t:-92,a1:[150,0]},
+        props:[{k:"rect",x:18,y:74,w:40,h:5},{k:"rect",x:34,y:79,w:5,h:13},{k:"rect",x:56,y:40,w:4,h:14,rx:2},{k:"rect",x:80,y:64,w:4,h:28},{k:"rect",x:96,y:20,w:6,h:72},{k:"cable",from:[96,48],j:"W1"}]}},
+  {id:"pushup",n:"6",name:"Push-up",sets:3,reps:"10",rest:"75\"",unit:"bw",start:"corpo libero",
+   note:"Mani poco più larghe delle spalle, corpo in linea dalla testa ai talloni. Scendi finché il petto è vicino a terra. Se 10 sono troppe, appoggia le ginocchia.",q:"push up piegamenti tecnica corretta",
+   fig:{base:{anchor:"A1",at:[95,87]},from:{t:198.8,l1:[18.8,18.8,115],a1:[90,90]},to:{t:186.2,l1:[6.2,6.2,115],a1:[15.8,141.4]}}},
+  {id:"legcurlmono",n:"7",name:"Leg curl sdraiato a una gamba",sets:2,reps:"12 per gamba",rest:"60\"",rir:"RIR 2",unit:"kg",start:"12 kg",
+   note:"Una gamba alla volta. Sali in 1\" e scendi lentamente in 3\": la fase di discesa è quella che protegge il ginocchio.",q:"leg curl sdraiato una gamba",
+   fig:LEGCURL_FIG},
+  {id:"legextmono",n:"8",name:"Leg extension a una gamba",sets:2,reps:"12 per gamba",rest:"60\"",rir:"RIR 2",unit:"kg",start:"15 kg",
+   note:"Una gamba alla volta. Tieni 1\" in estensione completa e scendi in 3\". Lavora il vasto mediale, che stabilizza la rotula.",q:"leg extension una gamba",
+   fig:LEGEXT_FIG}
  ]},
- b:{ name:"Seduta B", focus:"Stacco, tirata verticale, catena posteriore", ex:[
-  {id:"rdl",n:"1",name:"Stacco rumeno con bilanciere",sets:4,reps:"8",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"40 kg",
+ b:{ name:"Seduta B", focus:"Stacco rumeno, spinte e tirate, braccia, gambe a una gamba", ex:[
+  {id:"rdl",n:"1",name:"Stacco rumeno con bilanciere",sets:3,reps:"8",rest:"2'",rir:"RIR 2",unit:"kg",start:"40 kg",
    note:"Bacino indietro, schiena neutra, bilanciere vicino alle gambe. Scendi fino a metà tibia.",q:"stacco rumeno bilanciere tecnica corretta",
    fig:{base:{anchor:"A1",at:[55,90],a1:[90,90]},from:{t:-90,l1:[90,90,0]},to:{t:-15,l1:[70,100,0]},props:[{k:"plate",j:"W1",r:8.5}]}},
-  {id:"trazioni",n:"2",name:"Trazioni (o lat machine)",sets:4,reps:"6–10",rest:"2'",unit:"bw",start:"corpo libero · lat 40 kg",
-   note:"Petto verso la sbarra. Se arrivi a 10 pulite, aggiungi zavorra. Alla lat machine scrivi il carico nel campo kg.",q:"trazioni alla sbarra tecnica corretta",
-   fig:{vb:"0 -2 120 108",floor:false,base:{anchor:"W1",at:[62,14],t:-90,l1:[100,120,30]},from:{a1:[-80,-90]},to:{a1:[45,-90]},
-        props:[{k:"line",x1:28,y1:14,x2:96,y2:14,sw:2.4}]}},
-  {id:"stepdown",n:"3a",name:"Step-down eccentrico",sets:3,reps:"8 per gamba",rest:"–",unit:"bw",start:"corpo libero",
-   note:"Step da 20–30 cm. Scendi in 4\" e sfiora appena il tallone a terra. È l'esercizio chiave per il ginocchio.",q:"eccentric step down knee exercise",
-   fig:{vb:"0 -4 120 100",base:{anchor:"A1",at:[55,79]},from:{t:-90,l1:[90,90,0],l2:[75,80,0],a1:[60,80]},to:{t:-65,l1:[20,120,0],l2:[50,66,0],a1:[10,0]},
-        props:[{k:"rect",x:36,y:81,w:30,h:11,rx:1.5}]}},
-  {id:"lento",n:"3b",name:"Lento avanti con manubri in piedi",sets:3,reps:"8–10",rest:"90\"",unit:"kg",start:"10 kg per mano",
-   note:"Glutei e addome contratti, non inarcare la schiena.",q:"lento avanti manubri in piedi tecnica",
-   fig:{vb:"0 -8 120 100",base:STAND,from:{a1:[100,-80]},to:{a1:[-90,-90]},props:[{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
-  {id:"legcurl",n:"4",name:"Leg curl (sdraiato o seduto)",sets:3,reps:"10–12",rest:"90\"",unit:"kg",start:"25 kg",
-   note:"Sostituisce il Nordic. Sali in 1\", scendi lentamente in 3\": è la fase che protegge ginocchio e crociato.",q:"leg curl sdraiato esecuzione corretta",
-   fig:{base:{anchor:"P",at:[55,65],t:180,h:178,a1:[100,60],off:[-1.5,-1.5]},from:{l1:[0,0,90]},to:{l1:[0,-95,180]},
-        props:[{k:"rect",x:20,y:69,w:62,h:5},{k:"rect",x:30,y:74,w:4,h:18},{k:"rect",x:70,y:74,w:4,h:18},{k:"pad",j:"A1",r:3,dx:1.5,dy:-2}]}},
-  {id:"hipthrust",n:"5",name:"Hip thrust",sets:3,reps:"10",rest:"90\"",unit:"kg",start:"40 kg",
-   note:"Schiena alta sulla panca. Tieni 1\" in alto, mento verso il petto, tibie verticali.",q:"hip thrust bilanciere tecnica",
-   fig:{base:{anchor:"A1",at:[75,90]},from:{t:-158,l1:[-40,80,0],a1:[22,22]},to:{t:-180,l1:[0,90,0],a1:[0,0]},
-        props:[{k:"rect",x:22,y:75,w:16,h:17},{k:"plate",j:"P",r:7,dy:-6}]},
-   short:"Hip thrust", alts:[
-    {id:"glutebridge",short:"Glute bridge",name:"Glute bridge con bilanciere",sets:3,reps:"12",rest:"90\"",rir:"",unit:"kg",start:"40 kg",
-     note:"A terra, senza panca: più veloce da preparare. Lavora gli stessi glutei con un'escursione un po' più corta. Tieni 1\" in alto.",q:"glute bridge con bilanciere tecnica",
-     fig:{base:{anchor:"A1",at:[75,90],h:180},from:{t:180,l1:[-45,60,0],a1:[0,0]},to:{t:154,l1:[-14,95,0],a1:[-20,-20]},props:[{k:"plate",j:"P",r:7,dy:-6}]}},
-    {id:"pullthrough",short:"Pull-through",name:"Pull-through al cavo",sets:3,reps:"12",rest:"90\"",rir:"",unit:"kg",start:"15 kg",
-     note:"Di spalle al cavo basso, corda tra le gambe. Porta il bacino indietro, poi spingi le anche avanti e stringi i glutei. Insegna bene il movimento d'anca.",q:"cable pull through tecnica",
-     fig:{base:{anchor:"A1",at:[66,90]},from:{t:-90,l1:[90,90,0],a1:[100,70]},to:{t:-30,l1:[75,100,0],a1:[140,140]},props:[{k:"rect",x:6,y:20,w:6,h:72},{k:"cable",from:[12,86],j:"W1"}]}},
-    {id:"hipthrust1",short:"Su una gamba",name:"Hip thrust su una gamba",sets:3,reps:"10 per gamba",rest:"75\"",rir:"",unit:"bw",start:"corpo libero",
-     note:"Schiena alta sulla panca, una gamba sola. Ottimo per la stabilità di bacino e ginocchio. Quando diventa facile, appoggia un manubrio sull'anca.",q:"single leg hip thrust tecnica",
-     fig:{base:{anchor:"A1",at:[75,90],l2:[-75,30,-60]},from:{t:-158,l1:[-40,80,0],a1:[22,22]},to:{t:-180,l1:[0,90,0],a1:[0,0]},props:[{k:"rect",x:22,y:75,w:16,h:17}]}}
-   ]},
-  {id:"iper",n:"6a",name:"Iperestensioni a 45°",sets:3,reps:"12",rest:"–",unit:"bw",start:"corpo libero",
-   note:"Il movimento parte dalle anche, non dalla schiena. Più avanti tieni un disco al petto.",q:"iperestensioni 45 gradi esecuzione",
-   fig:{base:{anchor:"A1",at:[30,85],rel:true,l1:[135,135,45],a1:[145,0]},from:{t:80},to:{t:-45},
-        props:[{k:"line",x1:47,y1:76,x2:62,y2:61,sw:5},{k:"line",x1:44,y1:78,x2:40,y2:92,sw:2.5},{k:"line",x1:40,y1:92,x2:24,y2:88,sw:2.5},{k:"pad",j:"A1",r:2.6,dx:3,dy:3,back:true}]}},
-  {id:"sideplank",n:"6b",name:"Side plank",sets:3,reps:"30–40\" per lato",rest:"60\"",unit:"s",start:"30\"",
-   note:"Corpo in linea, anca alta, gomito sotto la spalla.",q:"side plank plank laterale esecuzione",
-   fig:{base:{anchor:"A1",at:[95,89],a1:[-90,-90],a2:[90,0],off:[0,-2]},from:{t:200,l1:[5,5,0]},to:{t:191,l1:[11,11,0]}}}
- ]},
- c:{ name:"Seduta C", focus:"Lavoro su una gamba, stabilità, tirata orizzontale", ex:[
-  {id:"stacco",n:"1",name:"Stacco da terra con bilanciere",sets:4,reps:"5–6",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"50 kg",
-   note:"Sostituisce la trap bar. Bilanciere sopra il centro del piede, schiena neutra, spingi il pavimento con le gambe.",q:"stacco da terra bilanciere tecnica corretta",
-   fig:{base:{anchor:"A1",at:[58,90],a1:[90,90]},from:{t:-90,l1:[90,90,0]},to:{t:-35,l1:[25,118,0]},props:[{k:"plate",j:"W1",r:9,dy:3}]},
-   short:"Stacco da terra", alts:[
-    {id:"sumo",short:"Stacco sumo",name:"Stacco sumo con bilanciere",sets:4,reps:"5–6",rest:"2'30\"",rir:"RIR 2",unit:"kg",start:"50 kg",
-     note:"Piedi larghi, punte aperte, ginocchia spinte in fuori. Busto più verticale: meno carico sulla zona lombare, più lavoro per adduttori e quadricipiti.",q:"stacco sumo tecnica corretta",
-     fig:{base:{anchor:"A1",at:[60,90],a1:[90,90],off:[-4,0]},from:{t:-90,l1:[90,90,0]},to:{t:-50,l1:[20,105,0]},props:[{k:"plate",j:"W1",r:9,dy:3}]}},
-    {id:"goblet",short:"Goblet squat",name:"Goblet squat pesante",sets:4,reps:"8",rest:"2'",rir:"RIR 2",unit:"kg",start:"20 kg",
-     note:"Manubrio o kettlebell tenuto al petto. Busto dritto e discesa profonda, senza carico sulla schiena. La scelta più semplice se vuoi risparmiare la zona lombare.",q:"goblet squat tecnica corretta",
-     fig:{base:{anchor:"A1",at:[62,90]},from:{t:-90,l1:[90,90,0],a1:[80,-60]},to:{t:-70,l1:[5,120,0],a1:[100,-40]},props:[{k:"box",j:"W1",w:6,h:7,dx:1}]}},
-    {id:"legpress",short:"Leg press",name:"Leg press 45°",sets:4,reps:"8–10",rest:"2'",rir:"RIR 2",unit:"kg",start:"80 kg (carico aggiunto)",
-     note:"Piedi a larghezza spalle al centro della pedana. Scendi finché il bacino resta attaccato allo schienale, senza bloccare le ginocchia in alto.",q:"leg press 45 gradi esecuzione corretta",
-     fig:{base:{anchor:"P",at:[40,72],t:-150,a1:[60,0]},from:{l1:[-35,-35,-125]},to:{l1:[-83,17,-125]},
-          props:[{k:"line",x1:38,y1:75,x2:16,y2:62,sw:4},{k:"line",x1:38,y1:76,x2:50,y2:76,sw:4},{k:"rect",x:32,y:78,w:6,h:14},{k:"line",x1:60,y1:86,x2:106,y2:54,sw:2},{k:"jline",a:"A1",b:"T1",ext:5,sw:3,off:[1.6,-1.2]}]}}
-   ]},
-  {id:"affondo",n:"2",name:"Affondo indietro con manubri",sets:3,reps:"8 per gamba",rest:"90\"",unit:"kg",start:"10 kg per mano",
-   note:"Passo indietro, ginocchio posteriore vicino a terra. Più gentile sul ginocchio dell'affondo in avanti.",q:"affondi indietro manubri tecnica",
-   fig:{base:{anchor:"A1",at:[68,90],a1:[90,90]},from:{t:-90,l1:[90,90,0],l2:[90,90,0]},to:{t:-88,l1:[5,100,0],l2:[110,175,20]},props:[{k:"db",j:"W1"}]}},
-  {id:"inclinata",n:"3a",name:"Panca inclinata con manubri",sets:3,reps:"10",rest:"–",unit:"kg",start:"12 kg per mano",
-   note:"Panca a 30°. Scendi controllato fino all'altezza del petto.",q:"panca inclinata manubri tecnica",
-   fig:{base:{anchor:"P",at:[70,66],t:210,h:210,l1:[20,95,0],off:[-2,-1]},from:{a1:[120,-70]},to:{a1:[280,-85]},
-        props:[{k:"line",x1:69,y1:70,x2:45,y2:56,sw:4},{k:"line",x1:66,y1:70,x2:82,y2:70,sw:4},{k:"rect",x:58,y:72,w:4,h:20},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
-  {id:"pulley",n:"3b",name:"Pulley basso",sets:3,reps:"10–12",rest:"90\"",unit:"kg",start:"35 kg",
-   note:"Petto alto, tira verso l'ombelico senza dondolare col busto.",q:"pulley basso tecnica corretta",
-   fig:{base:{anchor:"P",at:[40,72],l1:[0,20,-80]},from:{t:-78,a1:[10,5]},to:{t:-95,a1:[150,0]},
-        props:[{k:"rect",x:18,y:74,w:40,h:5},{k:"rect",x:34,y:79,w:5,h:13},{k:"rect",x:80,y:64,w:4,h:28},{k:"rect",x:96,y:20,w:6,h:72},{k:"cable",from:[96,62],j:"W1"}]}},
-  {id:"rdl1",n:"4",name:"Stacco rumeno su una gamba",sets:3,reps:"8 per gamba",rest:"75\"",unit:"kg",start:"12 kg",
-   note:"Bacino parallelo al pavimento. Allena equilibrio e stabilità di caviglia, ginocchio e anca.",q:"stacco rumeno monopodalico manubrio",
-   fig:{base:{anchor:"A1",at:[60,90],a1:[90,90],a2:[80,90]},from:{t:-90,l1:[90,90,0],l2:[100,110,0]},to:{t:-5,l1:[85,95,0],l2:[175,178,90]},props:[{k:"db",j:"W1"}]}},
-  {id:"calf",n:"5a",name:"Calf raise in piedi",sets:3,reps:"12",rest:"–",unit:"kg",start:"16 kg",
-   note:"Avampiede su uno step: tieni 2\" in alto e scendi in 3\" sotto il livello dello step.",q:"calf raise in piedi su step",
-   fig:{vb:"0 -8 120 100",base:{anchor:"T1",at:[62,80],t:-90,a1:[90,90]},from:{l1:[90,90,-25]},to:{l1:[90,90,40]},props:[{k:"rect",x:58,y:80,w:34,h:12,rx:1.5},{k:"db",j:"W1"}]}},
-  {id:"calfsed",n:"5b",name:"Calf raise da seduto",sets:2,reps:"15",rest:"60\"",unit:"kg",start:"20 kg",
-   note:"Lavora il soleo, che aiuta molto ad assorbire i carichi sul ginocchio.",q:"seated calf raise soleus",
-   fig:{base:{anchor:"P",at:[45,64],t:-90,a1:[50,60]},from:{l1:[10,90,-25]},to:{l1:[-5,90,30]},
-        props:[{k:"rect",x:25,y:67,w:30,h:5},{k:"rect",x:38,y:72,w:4,h:20},{k:"rect",x:66,y:84,w:14,h:8},{k:"box",j:"K1",w:12,h:4,dy:-3.5}]}},
-  {id:"abwheel",n:"6a",name:"Ab wheel rollout in ginocchio",sets:3,reps:"6–10",rest:"–",unit:"bw",start:"corpo libero",
-   note:"Fermati prima che la schiena si inarchi, glutei contratti.",q:"ab wheel rollout in ginocchio tecnica",
-   fig:{base:{anchor:"K1",at:[40,88]},from:{t:-15,l1:[120,180,180],a1:[85,85]},to:{t:-2,l1:[160,180,180],a1:[20,15]},props:[{k:"wheel",j:"W1",r:4.5,dy:-1}]}},
-  {id:"suitcase",n:"6b",name:"Suitcase carry",sets:3,reps:"30 m per lato",rest:"60\"",unit:"m",start:"20 kg",
-   note:"Un manubrio pesante in una mano. Cammina con il busto dritto senza inclinarti verso il peso.",q:"suitcase carry esecuzione",
-   fig:{period:1600,base:{anchor:"P",at:[60,51],t:-90,a1:[82,94]},from:{l1:[75,95,0],l2:[105,100,0],a2:[70,60]},to:{l1:[105,100,0],l2:[75,95,0],a2:[110,120]},props:[{k:"db",j:"W1",dy:1}]},
-   short:"Suitcase carry", alts:[
-    {id:"farmer",short:"Farmer walk",name:"Farmer walk",sets:3,reps:"30 m",rest:"60\"",rir:"",unit:"m",start:"2 × 20 kg",
-     note:"Un manubrio per mano. Più facile da gestire del suitcase: allena presa, postura e core. Spalle basse, passi corti.",q:"farmer walk esecuzione corretta",
-     fig:{period:1600,base:{anchor:"P",at:[60,51],t:-90,a1:[82,94],a2:[100,88]},from:{l1:[75,95,0],l2:[105,100,0]},to:{l1:[105,100,0],l2:[75,95,0]},props:[{k:"db",j:"W1",dy:1},{k:"db",j:"W2",dy:1,back:true}]}},
-    {id:"suitcasehold",short:"Hold sul posto",name:"Suitcase hold sul posto",sets:3,reps:"30–40\" per lato",rest:"60\"",rir:"",unit:"s",start:"20 kg",
-     note:"Lo stesso esercizio senza camminare, utile se in sala non hai spazio. Busto dritto e spalle alla stessa altezza.",q:"suitcase hold isometric core",
-     fig:{base:Object.assign({},STAND,{a1:[82,94]}),from:{a2:[80,88]},to:{a2:[84,92]},props:[{k:"db",j:"W1",dy:1}]}},
-    {id:"plankdrag",short:"Plank + manubrio",name:"Plank con trascinamento manubrio",sets:3,reps:"8 per lato",rest:"60\"",rir:"",unit:"kg",start:"8 kg",
-     note:"In plank sulle mani, piedi un po' larghi. Con una mano porta il manubrio dall'altro lato passando sotto il corpo. Il bacino non deve ruotare.",q:"plank pull through dumbbell",
-     fig:{base:{anchor:"A1",at:[95,87],t:198.8,l1:[18.8,18.8,115],a2:[90,90],off:[-3,0]},from:{a1:[75,110]},to:{a1:[105,75]},props:[{k:"db",j:"W1",dy:1}]}}
-   ]},
-  {id:"facepull",n:"7",name:"Face pull seduto (postazione pulley)",sets:2,reps:"15",rest:"45\"",unit:"kg",start:"10 kg",
-   note:"Resta alla postazione del pulley basso e monta la corda. Tira verso la fronte aprendo le mani ai lati delle orecchie, gomiti alti. Con il cavo basso usa un carico leggero e tieni il busto fermo.",q:"seated face pull cable row station",
-   fig:{base:{anchor:"P",at:[40,72],l1:[0,20,-80],t:-92},from:{a1:[15,0]},to:{a1:[-178,-35]},
-        props:[{k:"rect",x:18,y:74,w:40,h:5},{k:"rect",x:34,y:79,w:5,h:13},{k:"rect",x:80,y:64,w:4,h:28},{k:"rect",x:96,y:20,w:6,h:72},{k:"cable",from:[96,62],j:"W1"}]}}
+  {id:"frenchcorda",n:"2",name:"French press al cavo con corda",sets:3,reps:"8",rest:"75\"",rir:"RIR 2",unit:"kg",start:"15 kg",
+   note:"Di spalle al cavo, corda dietro la testa, busto leggermente in avanti. Distendi le braccia in alto e avanti tenendo i gomiti fermi vicino alla testa.",q:"french press cavo corda sopra la testa",
+   fig:{vb:"0 -6 120 100",base:{anchor:"A1",at:[66,90],t:-75,l1:[75,98,0],l2:[105,100,0]},from:{a1:[-95,-200]},to:{a1:[-95,-70]},
+        props:[{k:"rect",x:8,y:8,w:6,h:84},{k:"cable",from:[14,40],j:"W1"}]}},
+  {id:"curlalt",n:"3",name:"Curl con manubri alternati",sets:3,reps:"8 per braccio",rest:"75\"",rir:"RIR 2",unit:"kg",start:"10 kg per mano",
+   note:"In piedi, gomiti fermi lungo i fianchi. Un braccio alla volta, ruotando il palmo verso l'alto mentre sali.",q:"curl manubri alternati tecnica",
+   fig:{base:STAND,from:{a1:[78,85],a2:[100,-55]},to:{a1:[78,-60],a2:[100,95]},props:[{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
+  {id:"shoulderpress",n:"4",name:"Shoulder press seduto con manubri",sets:3,reps:"8",rest:"90\"",rir:"RIR 2",unit:"kg",start:"12 kg per mano",
+   note:"Schienale verticale, schiena appoggiata. Spingi i manubri sopra la testa senza inarcare la zona lombare.",q:"shoulder press manubri seduto tecnica",
+   fig:{vb:"0 -4 120 100",base:{anchor:"P",at:[50,72],t:-92,l1:[0,95,0]},from:{a1:[100,-80]},to:{a1:[-90,-90]},
+        props:[{k:"rect",x:34,y:74,w:28,h:4},{k:"rect",x:40,y:36,w:5,h:38},{k:"rect",x:46,y:78,w:4,h:14},{k:"db",j:"W1"},{k:"db",j:"W2",back:true}]}},
+  {id:"legextmono",n:"5",name:"Leg extension a una gamba",sets:2,reps:"12 per gamba",rest:"60\"",rir:"RIR 2",unit:"kg",start:"15 kg",
+   note:"Una gamba alla volta. Tieni 1\" in estensione completa e scendi in 3\".",q:"leg extension una gamba",
+   fig:LEGEXT_FIG},
+  {id:"latneutra",n:"6",name:"Lat machine presa neutra",sets:3,reps:"8",rest:"90\"",rir:"RIR 2",unit:"kg",start:"45 kg",
+   note:"Maniglia a presa stretta con palmi che si guardano. Petto alto, tira portando i gomiti verso i fianchi fino al mento.",q:"lat machine presa neutra tecnica",
+   fig:{vb:"0 -2 120 100",base:{anchor:"P",at:[50,72],t:-90,l1:[0,90,0]},from:{a1:[-85,-88]},to:{a1:[105,-80]},
+        props:[{k:"rect",x:34,y:74,w:26,h:4},{k:"rect",x:44,y:78,w:4,h:14},{k:"rect",x:84,y:0,w:6,h:92},{k:"line",x1:50,y1:2,x2:87,y2:2,sw:2},{k:"box",j:"K1",w:10,h:4,dy:-4},{k:"cable",from:[51,2],j:"W1"}]}},
+  {id:"panca",n:"7",name:"Panca piana con manubri",sets:3,reps:"8",rest:"2'",rir:"RIR 2",unit:"kg",start:"16 kg per mano",
+   note:"Scapole addotte, piedi ben piantati, gomiti a circa 45° dal busto. Scendi fino all'altezza del petto.",q:"panca piana manubri esecuzione corretta",
+   fig:PANCA_FIG},
+  {id:"legpressmono",n:"8",name:"Leg press 45° a una gamba",sets:3,reps:"8 per gamba",rest:"90\"",rir:"RIR 2",unit:"kg",start:"40 kg (carico aggiunto)",
+   note:"Piede al centro della pedana. Il ginocchio segue la punta del piede senza cedere verso l'interno. Scendi finché il bacino resta attaccato allo schienale.",q:"leg press una gamba tecnica",
+   fig:{base:{anchor:"P",at:[40,72],t:-150,a1:[60,0],l2:[-60,60,-30]},from:{l1:[-35,-35,-125]},to:{l1:[-83,17,-125]},
+        props:[{k:"line",x1:38,y1:75,x2:16,y2:62,sw:4},{k:"line",x1:38,y1:76,x2:50,y2:76,sw:4},{k:"rect",x:32,y:78,w:6,h:14},{k:"line",x1:60,y1:86,x2:106,y2:54,sw:2},{k:"jline",a:"A1",b:"T1",ext:5,sw:3,off:[1.6,-1.2]}]}}
  ]}
 };
+
+/* Rotazione: lun-mer-ven. Settimana del 23/11/2026 = A-B-A, quella dopo B-A-B, e così via. */
+const ROT_ANCHOR = Date.UTC(2026,10,23);   // lunedì 23 novembre 2026
+const TRAIN_IDX = {1:0, 3:1, 5:2};          // getDay(): lun, mer, ven -> posizione nella settimana
+const WD_IT = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+function rotationFor(iso){
+  const [y,m,d] = iso.split("-").map(Number);
+  const t = Date.UTC(y,m-1,d), wd = new Date(t).getUTCDay();
+  const monday = t - ((wd+6)%7)*864e5;
+  const week = Math.round((monday - ROT_ANCHOR)/(7*864e5));
+  const pattern = ((week%2)+2)%2===0 ? ["a","b","a"] : ["b","a","b"];
+  const next = ((week%2)+2)%2===0 ? ["b","a","b"] : ["a","b","a"];
+  const pos = TRAIN_IDX[wd];
+  return { wd, pattern, next, today: pos===undefined ? null : pattern[pos] };
+}
+function nextSessionFrom(iso){
+  const [y,m,d] = iso.split("-").map(Number); let t = Date.UTC(y,m-1,d);
+  for(let i=0;i<8;i++){ const s=new Date(t+i*864e5).toISOString().slice(0,10); const r=rotationFor(s); if(r.today) return {iso:s, day:r.today, wd:r.wd, inDays:i}; }
+  return null;
+}
 
 const FIELDS = { kg:[["kg","kg","decimal"],["rip","rip","numeric"]], bw:[["+kg","+kg","decimal"],["rip","rip","numeric"]], s:[["sec","sec","numeric"]], m:[["kg","kg","decimal"],["m","m","numeric"]] };
 
@@ -777,15 +737,14 @@ function renderGuide(){
   v.innerHTML=`
   <div class="panel">
     <h2>Come è organizzata</h2>
-    <p>Profilo: 30 anni, 72 kg, livello intermedio, obiettivo forma e salute. Ginocchio e schiena senza problemi: il lavoro è di prevenzione e rinforzo. Niente cardio. Ogni seduta dura circa 60 minuti, riscaldamento compreso.</p>
+    <p>Due schede, A e B, su tre giorni a settimana: lunedì, mercoledì e venerdì. Le schede si alternano, quindi ogni due settimane fai tre volte A e tre volte B.</p>
     <div class="tbl"><table>
-      <thead><tr><th>Giorno</th><th>Seduta</th><th>Focus</th></tr></thead>
+      <thead><tr><th>Settimana</th><th>Lunedì</th><th>Mercoledì</th><th>Venerdì</th></tr></thead>
       <tbody>
-        <tr><td>Lunedì</td><td><span class="dot" style="background:var(--a)"></span><a href="#a">A</a></td><td>Squat, spinta orizzontale, quadricipite e ginocchio</td></tr>
-        <tr><td>Mercoledì</td><td><span class="dot" style="background:var(--b)"></span><a href="#b">B</a></td><td>Stacco rumeno, tirata verticale, catena posteriore</td></tr>
-        <tr><td>Venerdì</td><td><span class="dot" style="background:var(--c)"></span><a href="#c">C</a></td><td>Stacco da terra, lavoro su una gamba, tirata orizzontale</td></tr>
+        <tr><td>1ª (dal 23 nov)</td><td><span class="dot" style="background:var(--a)"></span><a href="#a">A</a></td><td><span class="dot" style="background:var(--b)"></span><a href="#b">B</a></td><td><span class="dot" style="background:var(--a)"></span><a href="#a">A</a></td></tr>
+        <tr><td>2ª</td><td><span class="dot" style="background:var(--b)"></span><a href="#b">B</a></td><td><span class="dot" style="background:var(--a)"></span><a href="#a">A</a></td><td><span class="dot" style="background:var(--b)"></span><a href="#b">B</a></td></tr>
       </tbody></table></div>
-    <p style="margin-top:10px">Lascia almeno un giorno di riposo tra due sedute. Quando riprendi con il calcio, tieni A e B ad almeno 48 ore dalla partita.</p>
+    <p style="margin-top:10px">Poi si ricomincia: 3ª settimana come la 1ª, 4ª come la 2ª. In cima all'app trovi sempre la seduta di oggi. Se salti un giorno, fai la seduta prevista per quel giorno e prosegui con la rotazione.</p>
   </div>
   <div class="panel">
     <h2>RIR: quanto spingere</h2>
@@ -807,22 +766,15 @@ function renderGuide(){
   <div class="panel">
     <h2>Regole d'oro</h2>
     <ul class="rules">
-      <li><b>Ginocchio:</b> in squat, affondi e step-down deve restare in linea con la seconda o terza dita del piede, senza cedere verso l'interno. Un fastidio fino a 3/10 è accettabile se il giorno dopo non è peggiorato.</li>
+      <li><b>Ginocchio:</b> in leg press, leg extension e stacco rumeno deve restare in linea con la seconda o terza dita del piede, senza cedere verso l'interno. Un fastidio fino a 3/10 è accettabile se il giorno dopo non è peggiorato.</li>
       <li><b>Schiena:</b> prima di ogni ripetizione pesante respira e contrai l'addome come per ricevere un pugno, poi mantieni la schiena neutra.</li>
       <li><b>Tempi:</b> se sei in ritardo taglia l'ultima serie dei complementari. Non saltare core e riscaldamento.</li>
       <li><b>Annota tutto:</b> scrivi kg e ripetizioni di ogni serie e premi Salva a fine seduta. La volta dopo vedi i valori precedenti sotto ogni esercizio e come suggerimento nei campi.</li>
     </ul>
   </div>
   <div class="panel">
-    <h2>Sostituzioni</h2>
-    <p>Trap bar non disponibile: nella seduta C c'è lo <b>stacco da terra con bilanciere</b>. Nordic curl non disponibile: nella seduta B c'è il <b>leg curl</b> con discesa lenta in 3".</p>
-    <p>Su alcuni esercizi trovi la riga <b>Variante</b>: tocca un'alternativa e la scheda cambia figura, serie, note e video. La scelta resta salvata e ogni variante ha il suo storico dei carichi. Alternative disponibili:</p>
-    <ul class="rules">
-      <li><b>Hip thrust (B5):</b> glute bridge con bilanciere, pull-through al cavo, hip thrust su una gamba.</li>
-      <li><b>Stacco da terra (C1):</b> stacco sumo, goblet squat pesante, leg press 45°.</li>
-      <li><b>Suitcase carry (C6b):</b> farmer walk, suitcase hold sul posto, plank con trascinamento manubrio.</li>
-    </ul>
-    <p style="margin-top:10px">Il face pull si fa da seduti alla postazione del pulley basso, subito dopo averlo usato per il pulley.</p>
+    <h2>Video ed esercizi a una gamba</h2>
+    <p>Gli esercizi "a una gamba" (leg curl, leg extension, leg press) si fanno prima con una gamba e poi con l'altra: le ripetizioni indicate valgono per ciascuna. Segna nel registro il carico usato per una gamba.</p>
     <p>I pulsanti video aprono una ricerca YouTube mirata sull'esercizio: scegli un video che mostri la tecnica di lato e per intero.</p>
   </div>
   <div class="panel" id="notifiche">
@@ -866,7 +818,15 @@ function renderGuide(){
 }
 
 /* ---------- Init + routing ---------- */
-["a","b","c"].forEach(renderDay);
+const todayBar=document.createElement("div"); todayBar.className="todaybar"; main.appendChild(todayBar);
+function renderToday(){
+  const r=rotationFor(todayISO); const pl=k=>`<span class="pl ${k}">${k.toUpperCase()}</span>`;
+  const wk=`<span class="wk"><span class="grp">Questa settimana ${r.pattern.map(pl).join("")}</span><span class="grp">Prossima ${r.next.map(pl).join("")}</span></span>`;
+  if(r.today){ todayBar.innerHTML=`<span>Oggi ${WD_IT[r.wd]}: <a href="#${r.today}">Seduta ${r.today.toUpperCase()}</a></span>${wk}`; }
+  else { const n=nextSessionFrom(todayISO); todayBar.innerHTML=`<span>Oggi riposo.${n?` Prossima: <a href="#${n.day}">Seduta ${n.day.toUpperCase()}</a> ${n.inDays===1?"domani":WD_IT[n.wd]}.`:""}</span>${wk}`; }
+}
+renderToday();
+["a","b"].forEach(renderDay);
 renderGuide();
 delete views.guida; const guideView=document.getElementById("view-guida");
 renderStatusAll();
@@ -874,8 +834,9 @@ for(const f of figures){ if(io) io.observe(f.svg); else f.visible=true; }
 
 function route(){
   const h=(location.hash||"").replace("#","");
-  const key = ["a","b","c","guida"].includes(h) ? h : "a";
-  for(const k of ["a","b","c"]) views[k].hidden = k!==key;
+  const fallback = (rotationFor(todayISO).today) || ((nextSessionFrom(todayISO)||{}).day) || "a";
+  const key = ["a","b","guida"].includes(h) ? h : fallback;
+  for(const k of ["a","b"]) views[k].hidden = k!==key;
   guideView.hidden = key!=="guida";
   document.querySelectorAll("nav.tabs a").forEach(a=>{ if(a.dataset.day===key) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
   if(!io){ if(!raf) raf=requestAnimationFrame(tick); }
